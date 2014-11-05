@@ -1,0 +1,11 @@
+{
+  "name": "kompetencyjny",
+  "description": "kompetencyjny app",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {},
+  "devDependencies": {
+    "gulp": "^3.8.10",
+    "pixi": "^0.2.1"
+  }
+}
