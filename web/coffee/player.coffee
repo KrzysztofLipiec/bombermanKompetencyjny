@@ -6,7 +6,8 @@ class Player
         y:0
     }
     #@world= world
-    @sprite = new PIXI.Sprite(PIXI.Texture.fromImage('images/mario.png'))
+    @speed = 0.3
+    @sprite = new PIXI.Sprite(PIXI.Texture.fromImage('images/right.png'))
     @sprite.scale.x=@sprite.scale.y=@s
   update: ->
     @sprite.position.x = @position.x*50*@s

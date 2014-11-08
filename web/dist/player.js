@@ -7,7 +7,8 @@ Player = (function() {
       x: 0,
       y: 0
     };
-    this.sprite = new PIXI.Sprite(PIXI.Texture.fromImage('images/mario.png'));
+    this.speed = 0.3;
+    this.sprite = new PIXI.Sprite(PIXI.Texture.fromImage('images/right.png'));
     this.sprite.scale.x = this.sprite.scale.y = this.s;
   }
 

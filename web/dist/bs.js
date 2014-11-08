@@ -1,15 +1,14 @@
-var BS;
+var BS,
+  __modulo = function(a, b) { return (+a % (b = +b) + b) % b; };
 
 BS = (function() {
   function BS() {
     if (window.innerWidth >= window.innerHeight) {
       this.x = window.innerHeight;
       this.y = window.innerHeight;
-      console.log(window.innerHeight);
     } else {
       this.x = window.innerWidth;
       this.y = window.innerWidth;
-      console.log(window.innerWidth);
     }
     this.scale = this.x / 15 / 50;
     this.stage = new PIXI.Stage(0x66FF99);
@@ -19,8 +18,6 @@ BS = (function() {
     this.p1 = new Player(this.scale);
     this.stage.addChild(this.p1.sprite);
     this.p1.scale = this.scale;
-    console.log(this.scale);
-    console.log(this.p1.scale);
   }
 
   BS.prototype.makeWorld = function() {
@@ -49,7 +46,6 @@ BS = (function() {
               break;
             case 2:
               this.tab[i][j] = new Destro();
-              this.tab[i][j].destructable = true;
               this.tab[i][j].sprite.position.x = i * 50 * this.scale;
               this.tab[i][j].sprite.position.y = j * 50 * this.scale;
               this.tab[i][j].sprite.scale.x = this.tab[i][j].sprite.scale.y = this.scale;
@@ -74,34 +70,52 @@ BS = (function() {
   BS.prototype.keyDownTextField = function(e) {
     var keyCode;
     keyCode = e.keyCode;
-    switch (keyCode) {
-      case 37:
-        if (this.p1.position.x >= 1) {
-          if (this.tab[this.p1.position.x - 1][this.p1.position.y].moveable === true) {
-            return this.p1.position.x -= 1;
+    if (__modulo(this.p1.position.x, 1) === 0 && __modulo(this.p1.position.y, 1) === 0) {
+      switch (keyCode) {
+        case 37:
+          if (this.p1.position.x >= 1) {
+            if (this.tab[this.p1.position.x - 1][this.p1.position.y].moveable === true) {
+              TweenLite.to(this.p1.position, this.p1.speed, {
+                x: this.p1.position.x - 1,
+                ease: Linear.easeNone
+              });
+              return this.p1.sprite.setTexture(PIXI.Texture.fromImage('images/left.png'));
+            }
           }
-        }
-        break;
-      case 39:
-        if (this.p1.position.x < this.x - 1) {
-          if (this.tab[this.p1.position.x + 1][this.p1.position.y].moveable === true) {
-            return this.p1.position.x += 1;
+          break;
+        case 39:
+          if (this.p1.position.x < this.x - 1) {
+            if (this.tab[this.p1.position.x + 1][this.p1.position.y].moveable === true) {
+              TweenLite.to(this.p1.position, this.p1.speed, {
+                x: this.p1.position.x + 1,
+                ease: Linear.easeNone
+              });
+              return this.p1.sprite.setTexture(PIXI.Texture.fromImage('images/right.png'));
+            }
           }
-        }
-        break;
-      case 38:
-        if (this.p1.position.y >= 1) {
-          if (this.tab[this.p1.position.x][this.p1.position.y - 1].moveable === true) {
-            return this.p1.position.y -= 1;
+          break;
+        case 38:
+          if (this.p1.position.y >= 1) {
+            if (this.tab[this.p1.position.x][this.p1.position.y - 1].moveable === true) {
+              TweenLite.to(this.p1.position, this.p1.speed, {
+                y: this.p1.position.y - 1,
+                ease: Linear.easeNone
+              });
+              return this.p1.sprite.setTexture(PIXI.Texture.fromImage('images/up.png'));
+            }
           }
-        }
-        break;
-      case 40:
-        if (this.p1.position.y < this.y - 1) {
-          if (this.tab[this.p1.position.x][this.p1.position.y + 1].moveable === true) {
-            return this.p1.position.y += 1;
+          break;
+        case 40:
+          if (__modulo(this.p1.position.y, 1) === 0) {
+            if (this.tab[this.p1.position.x][this.p1.position.y + 1].moveable === true) {
+              TweenLite.to(this.p1.position, this.p1.speed, {
+                y: this.p1.position.y + 1,
+                ease: Linear.easeNone
+              });
+              return this.p1.sprite.setTexture(PIXI.Texture.fromImage('images/down.png'));
+            }
           }
-        }
+      }
     }
   };
 

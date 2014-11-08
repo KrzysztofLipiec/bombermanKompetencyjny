@@ -3,11 +3,9 @@ class BS
     if (window.innerWidth >= window.innerHeight)
       @x=window.innerHeight
       @y=window.innerHeight
-      console.log(window.innerHeight)
     else
       @x=window.innerWidth
       @y=window.innerWidth
-      console.log(window.innerWidth)
     @scale=@x/15/50
     @stage = new PIXI.Stage(0x66FF99)
     @renderer = PIXI.autoDetectRenderer(@x, @y)
@@ -16,8 +14,6 @@ class BS
     @p1 = new Player(@scale)
     @stage.addChild(@p1.sprite)
     @p1.scale=@scale
-    console.log(@scale)
-    console.log(@p1.scale)
 
   makeWorld: ->
     @tab = [
@@ -55,7 +51,6 @@ class BS
             @stage.addChild(@tab[i][j].sprite)
           when 2
             @tab[i][j] = new Destro()
-            @tab[i][j].destructable=true
             @tab[i][j].sprite.position.x=i*50*@scale
             @tab[i][j].sprite.position.y=j*50*@scale
             @tab[i][j].sprite.scale.x=@tab[i][j].sprite.scale.y=@scale
@@ -66,26 +61,29 @@ class BS
     @p1.update()
     @renderer.render(@stage)
 
+
+
   keyDownTextField : (e) ->
     keyCode = e.keyCode
-    switch keyCode
-      when 37
-        if @p1.position.x >=1
-          if @tab[@p1.position.x-1][@p1.position.y].moveable==true
-            @p1.position.x-=1
-            #@p1.sprite.setTexture(PIXI.Texture.fromImage('images/left.png'))
-      when 39
-        if @p1.position.x <@x-1
-          if @tab[@p1.position.x+1][@p1.position.y].moveable==true
-            @p1.position.x+=1
-            #@p1.sprite.setTexture(PIXI.Texture.fromImage('images/right.png'))
-      when 38
-        if @p1.position.y >=1
-          if @tab[@p1.position.x][@p1.position.y-1].moveable==true
-            @p1.position.y -= 1
-            #@p1.sprite.setTexture(PIXI.Texture.fromImage('images/up.png'))
-      when 40
-        if @p1.position.y <@y-1
-          if @tab[@p1.position.x][@p1.position.y+1].moveable==true
-            @p1.position.y+=1
-            #@p1.sprite.setTexture(PIXI.Texture.fromImage('images/down.png'))
+    if @p1.position.x %% 1 is 0 and @p1.position.y %% 1 is 0
+      switch keyCode
+        when 37
+          if @p1.position.x >=1
+            if @tab[@p1.position.x-1][@p1.position.y].moveable==true
+              TweenLite.to(@p1.position, @p1.speed, {x:@p1.position.x-1, ease:Linear.easeNone,})
+              @p1.sprite.setTexture(PIXI.Texture.fromImage('images/left.png'))
+        when 39
+          if @p1.position.x <@x-1
+            if @tab[@p1.position.x+1][@p1.position.y].moveable==true
+              TweenLite.to(@p1.position, @p1.speed, {x:@p1.position.x+1, ease:Linear.easeNone})
+              @p1.sprite.setTexture(PIXI.Texture.fromImage('images/right.png'))
+        when 38
+          if @p1.position.y >=1
+            if @tab[@p1.position.x][@p1.position.y-1].moveable==true
+              TweenLite.to(@p1.position, @p1.speed,{y:@p1.position.y-1, ease:Linear.easeNone})
+              @p1.sprite.setTexture(PIXI.Texture.fromImage('images/up.png'))
+        when 40
+          if @p1.position.y %% 1 is 0
+            if @tab[@p1.position.x][@p1.position.y+1].moveable==true
+              TweenLite.to(@p1.position, @p1.speed, {y:@p1.position.y+1, ease:Linear.easeNone})
+              @p1.sprite.setTexture(PIXI.Texture.fromImage('images/down.png'))
