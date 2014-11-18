@@ -1,4 +1,7 @@
 class Block
-  constructor: ->
+  constructor: (x, y,scale) ->
     @destructable = null
     @moveable = null
+    @posX = x
+    @posY = y
+    @scale=scale

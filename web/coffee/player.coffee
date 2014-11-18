@@ -9,6 +9,9 @@ class Player
     @speed = 0.3
     @sprite = new PIXI.Sprite(PIXI.Texture.fromImage('images/right.png'))
     @sprite.scale.x=@sprite.scale.y=@s
+    @bombCount = 3
+    @bombRange = 3
+
   update: ->
     @sprite.position.x = @position.x*50*@s
     @sprite.position.y = @position.y*50*@s
