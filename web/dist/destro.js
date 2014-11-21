@@ -5,10 +5,14 @@ var Destro,
 Destro = (function(_super) {
   __extends(Destro, _super);
 
-  function Destro() {
+  function Destro(x, y, scale) {
     this.sprite = new PIXI.Sprite(PIXI.Texture.fromImage('images/grey.jpg'));
     this.destructable = true;
     this.moveable = false;
+    this.sprite.position.x = x * 50 * scale;
+    this.sprite.position.y = y * 50 * scale;
+    this.sprite.scale.x = this.sprite.scale.y = scale;
+    this.stone = false;
   }
 
   return Destro;

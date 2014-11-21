@@ -5,10 +5,14 @@ var Grass,
 Grass = (function(_super) {
   __extends(Grass, _super);
 
-  function Grass() {
+  function Grass(x, y, scale) {
     this.sprite = new PIXI.Sprite(PIXI.Texture.fromImage('images/white.jpg'));
     this.destructable = false;
     this.moveable = true;
+    this.sprite.position.x = x * 50 * scale;
+    this.sprite.position.y = y * 50 * scale;
+    this.sprite.scale.x = this.sprite.scale.y = scale;
+    this.stone = false;
   }
 
   return Grass;

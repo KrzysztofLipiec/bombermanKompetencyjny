@@ -5,10 +5,14 @@ var Stone,
 Stone = (function(_super) {
   __extends(Stone, _super);
 
-  function Stone() {
+  function Stone(x, y, scale) {
     this.sprite = new PIXI.Sprite(PIXI.Texture.fromImage('images/black.jpg'));
     this.destructable = false;
     this.moveable = false;
+    this.sprite.position.x = x * 50 * scale;
+    this.sprite.position.y = y * 50 * scale;
+    this.sprite.scale.x = this.sprite.scale.y = scale;
+    this.stone = true;
   }
 
   return Stone;

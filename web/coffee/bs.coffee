@@ -1,14 +1,14 @@
 class BS
   constructor: ->
     if (window.innerWidth >= window.innerHeight)
-      @x=window.innerHeight
-      @y=window.innerHeight
+      @sizex=window.innerHeight
+      @sizey=window.innerHeight
     else
-      @x=window.innerWidth
-      @y=window.innerWidth
-    @scale=@x/15/50
+      @sizex=window.innerWidth
+      @sizey=window.innerWidth
+    @scale=@sizex/15/50
     @stage = new PIXI.Stage(0x66FF99)
-    @renderer = PIXI.autoDetectRenderer(@x, @y)
+    @renderer = PIXI.autoDetectRenderer(@sizex, @sizey)
     document.body.appendChild(@renderer.view)
     @makeWorld()
     @p1 = new Player(@scale)
@@ -17,7 +17,7 @@ class BS
 
   makeWorld: ->
     @tab = [
-      [0,0,0,0,0,0,2,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,2,2,0,0,0,0,0,0,0],
       [0,1,0,1,0,1,0,1,0,1,0,1,0,1,0],
       [0,0,0,0,0,0,0,0,0,0,2,0,0,0,0],
       [0,1,0,1,0,1,0,1,0,1,0,1,0,1,0],
@@ -34,26 +34,36 @@ class BS
       [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 
     ];
-    for i in [0 .. @tab.length-1]
-      for j in [0 .. @tab.length-1]
+
+    @obstacles = [
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+
+    ];
+    for j in [0 .. @tab.length-1]
+      for i in [0 .. @tab.length-1]
         switch @tab[i][j]
           when 0
-            @tab[i][j] = new Grass()
-            @tab[i][j].sprite.position.x=i*50*@scale
-            @tab[i][j].sprite.position.y=j*50*@scale
-            @tab[i][j].sprite.scale.x=@tab[i][j].sprite.scale.y=@scale
+            @tab[i][j] = new Grass(i,j,@scale)
             @stage.addChild(@tab[i][j].sprite)
           when 1
-            @tab[i][j] = new Stone()
-            @tab[i][j].sprite.position.x=i*50*@scale
-            @tab[i][j].sprite.position.y=j*50*@scale
-            @tab[i][j].sprite.scale.x=@tab[i][j].sprite.scale.y=@scale
+            @tab[i][j] = new Stone(i,j,@scale)
             @stage.addChild(@tab[i][j].sprite)
           when 2
-            @tab[i][j] = new Destro()
-            @tab[i][j].sprite.position.x=i*50*@scale
-            @tab[i][j].sprite.position.y=j*50*@scale
-            @tab[i][j].sprite.scale.x=@tab[i][j].sprite.scale.y=@scale
+            @tab[i][j] = new Destro(i,j,@scale)
             @stage.addChild(@tab[i][j].sprite)
 
   frame: ->
@@ -73,7 +83,7 @@ class BS
               TweenLite.to(@p1.position, @p1.speed, {x:@p1.position.x-1, ease:Linear.easeNone,})
               @p1.sprite.setTexture(PIXI.Texture.fromImage('images/left.png'))
         when 39
-          if @p1.position.x <@x-1
+          if @p1.position.x <14
             if @tab[@p1.position.x+1][@p1.position.y].moveable==true
               TweenLite.to(@p1.position, @p1.speed, {x:@p1.position.x+1, ease:Linear.easeNone})
               @p1.sprite.setTexture(PIXI.Texture.fromImage('images/right.png'))
@@ -83,7 +93,20 @@ class BS
               TweenLite.to(@p1.position, @p1.speed,{y:@p1.position.y-1, ease:Linear.easeNone})
               @p1.sprite.setTexture(PIXI.Texture.fromImage('images/up.png'))
         when 40
-          if @p1.position.y %% 1 is 0
+          if @p1.position.y < 14
             if @tab[@p1.position.x][@p1.position.y+1].moveable==true
               TweenLite.to(@p1.position, @p1.speed, {y:@p1.position.y+1, ease:Linear.easeNone})
               @p1.sprite.setTexture(PIXI.Texture.fromImage('images/down.png'))
+        when 32
+          if @p1.bombCount > 0
+            #if @obstacles[@p1.position.x][@p1.position.y] == 0
+              @obstacles[@p1.position.x][@p1.position.y]= new Bomb(@p1.position.x,@p1.position.y,@scale)
+              pozx=@obstacles[@p1.position.x][@p1.position.y].posX
+              pozy=@obstacles[@p1.position.x][@p1.position.y].posY
+              @stage.addChildAt(@obstacles[@p1.position.x][@p1.position.y].sprite,225)
+              @tab[@p1.position.x][@p1.position.y].moveable=false
+              @p1.bombCount--
+              setTimeout(
+                -> basicScene.obstacles[pozx][pozy].explode(pozx,pozy)
+                3000
+              )

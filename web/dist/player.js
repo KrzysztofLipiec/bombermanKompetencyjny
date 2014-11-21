@@ -10,6 +10,8 @@ Player = (function() {
     this.speed = 0.3;
     this.sprite = new PIXI.Sprite(PIXI.Texture.fromImage('images/right.png'));
     this.sprite.scale.x = this.sprite.scale.y = this.s;
+    this.bombCount = 3;
+    this.bombRange = 3;
   }
 
   Player.prototype.update = function() {
