@@ -9,12 +9,20 @@ handlers:
   static_files: favicon.ico
   upload: favicon\.ico
 
-- url: .*
+- url: /.*
   script: main.app
+
+#/C:\Users\Daniel\bombermanKompetencyjny\web\dist
+- url:
+  script: index.html
+  upload:
+
+
 
 libraries:
 - name: webapp2
   version: "2.5.2"
 
-
-
+#
+#url: .*
+#  script: main.app
