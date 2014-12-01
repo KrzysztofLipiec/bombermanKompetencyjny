@@ -68,31 +68,28 @@ class BS
 
   frame: ->
     setTimeout(@frame.bind(@), 60 / 1000)
-    @p1.update()
     @renderer.render(@stage)
-
-
-
+    @p1.update()
   keyDownTextField : (e) ->
     keyCode = e.keyCode
     if @p1.position.x %% 1 is 0 and @p1.position.y %% 1 is 0
       switch keyCode
-        when 37
+        when (37 || 65)
           if @p1.position.x >=1
             if @tab[@p1.position.x-1][@p1.position.y].moveable==true
               TweenLite.to(@p1.position, @p1.speed, {x:@p1.position.x-1, ease:Linear.easeNone,})
               @p1.sprite.setTexture(PIXI.Texture.fromImage('images/left.png'))
-        when 39
+        when (39 || 68)
           if @p1.position.x <14
             if @tab[@p1.position.x+1][@p1.position.y].moveable==true
               TweenLite.to(@p1.position, @p1.speed, {x:@p1.position.x+1, ease:Linear.easeNone})
               @p1.sprite.setTexture(PIXI.Texture.fromImage('images/right.png'))
-        when 38
+        when (38 || 87)
           if @p1.position.y >=1
             if @tab[@p1.position.x][@p1.position.y-1].moveable==true
               TweenLite.to(@p1.position, @p1.speed,{y:@p1.position.y-1, ease:Linear.easeNone})
               @p1.sprite.setTexture(PIXI.Texture.fromImage('images/up.png'))
-        when 40
+        when (40 || 83)
           if @p1.position.y < 14
             if @tab[@p1.position.x][@p1.position.y+1].moveable==true
               TweenLite.to(@p1.position, @p1.speed, {y:@p1.position.y+1, ease:Linear.easeNone})
@@ -103,7 +100,8 @@ class BS
               @obstacles[@p1.position.x][@p1.position.y]= new Bomb(@p1.position.x,@p1.position.y,@scale)
               pozx=@obstacles[@p1.position.x][@p1.position.y].posX
               pozy=@obstacles[@p1.position.x][@p1.position.y].posY
-              @stage.addChildAt(@obstacles[@p1.position.x][@p1.position.y].sprite,225)
+              @stage.addChild(@obstacles[@p1.position.x][@p1.position.y].sprite);
+#              @stage.addChildAt(@obstacles[@p1.position.x][@p1.position.y].sprite,225)
               @tab[@p1.position.x][@p1.position.y].moveable=false
               @p1.bombCount--
               setTimeout(

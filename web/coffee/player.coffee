@@ -15,3 +15,7 @@ class Player
   update: ->
     @sprite.position.x = @position.x*50*@s
     @sprite.position.y = @position.y*50*@s
+    if(@sprite.parent)
+      parent = @sprite.parent
+      parent.removeChild(@sprite)
+      parent.addChild(@sprite)

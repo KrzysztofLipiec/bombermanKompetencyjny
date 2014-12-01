@@ -15,8 +15,14 @@ Player = (function() {
   }
 
   Player.prototype.update = function() {
+    var parent;
     this.sprite.position.x = this.position.x * 50 * this.s;
-    return this.sprite.position.y = this.position.y * 50 * this.s;
+    this.sprite.position.y = this.position.y * 50 * this.s;
+    if (this.sprite.parent) {
+      parent = this.sprite.parent;
+      parent.removeChild(this.sprite);
+      return parent.addChild(this.sprite);
+    }
   };
 
   return Player;

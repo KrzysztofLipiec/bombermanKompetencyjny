@@ -55,8 +55,8 @@ BS = (function() {
 
   BS.prototype.frame = function() {
     setTimeout(this.frame.bind(this), 60 / 1000);
-    this.p1.update();
-    return this.renderer.render(this.stage);
+    this.renderer.render(this.stage);
+    return this.p1.update();
   };
 
   BS.prototype.keyDownTextField = function(e) {
@@ -64,7 +64,7 @@ BS = (function() {
     keyCode = e.keyCode;
     if (__modulo(this.p1.position.x, 1) === 0 && __modulo(this.p1.position.y, 1) === 0) {
       switch (keyCode) {
-        case 37:
+        case 37 || 65:
           if (this.p1.position.x >= 1) {
             if (this.tab[this.p1.position.x - 1][this.p1.position.y].moveable === true) {
               TweenLite.to(this.p1.position, this.p1.speed, {
@@ -75,7 +75,7 @@ BS = (function() {
             }
           }
           break;
-        case 39:
+        case 39 || 68:
           if (this.p1.position.x < 14) {
             if (this.tab[this.p1.position.x + 1][this.p1.position.y].moveable === true) {
               TweenLite.to(this.p1.position, this.p1.speed, {
@@ -86,7 +86,7 @@ BS = (function() {
             }
           }
           break;
-        case 38:
+        case 38 || 87:
           if (this.p1.position.y >= 1) {
             if (this.tab[this.p1.position.x][this.p1.position.y - 1].moveable === true) {
               TweenLite.to(this.p1.position, this.p1.speed, {
@@ -97,7 +97,7 @@ BS = (function() {
             }
           }
           break;
-        case 40:
+        case 40 || 83:
           if (this.p1.position.y < 14) {
             if (this.tab[this.p1.position.x][this.p1.position.y + 1].moveable === true) {
               TweenLite.to(this.p1.position, this.p1.speed, {
@@ -113,7 +113,7 @@ BS = (function() {
             this.obstacles[this.p1.position.x][this.p1.position.y] = new Bomb(this.p1.position.x, this.p1.position.y, this.scale);
             pozx = this.obstacles[this.p1.position.x][this.p1.position.y].posX;
             pozy = this.obstacles[this.p1.position.x][this.p1.position.y].posY;
-            this.stage.addChildAt(this.obstacles[this.p1.position.x][this.p1.position.y].sprite, 225);
+            this.stage.addChild(this.obstacles[this.p1.position.x][this.p1.position.y].sprite);
             this.tab[this.p1.position.x][this.p1.position.y].moveable = false;
             this.p1.bombCount--;
             return setTimeout(function() {
