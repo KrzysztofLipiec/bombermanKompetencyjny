@@ -14,6 +14,7 @@ class BS
     @p1 = new Player(@scale)
     @stage.addChild(@p1.sprite)
     @p1.scale=@scale
+    console.log(@scale)
 
   makeWorld: ->
     @tab = [
@@ -74,22 +75,22 @@ class BS
     keyCode = e.keyCode
     if @p1.position.x %% 1 is 0 and @p1.position.y %% 1 is 0
       switch keyCode
-        when (37 || 65)
+        when (37 or 65)
           if @p1.position.x >=1
             if @tab[@p1.position.x-1][@p1.position.y].moveable==true
               TweenLite.to(@p1.position, @p1.speed, {x:@p1.position.x-1, ease:Linear.easeNone,})
               @p1.sprite.setTexture(PIXI.Texture.fromImage('images/left.png'))
-        when (39 || 68)
+        when (39 or 68)
           if @p1.position.x <14
             if @tab[@p1.position.x+1][@p1.position.y].moveable==true
               TweenLite.to(@p1.position, @p1.speed, {x:@p1.position.x+1, ease:Linear.easeNone})
               @p1.sprite.setTexture(PIXI.Texture.fromImage('images/right.png'))
-        when (38 || 87)
+        when (38 or 87)
           if @p1.position.y >=1
             if @tab[@p1.position.x][@p1.position.y-1].moveable==true
               TweenLite.to(@p1.position, @p1.speed,{y:@p1.position.y-1, ease:Linear.easeNone})
               @p1.sprite.setTexture(PIXI.Texture.fromImage('images/up.png'))
-        when (40 || 83)
+        when (40 or 83)
           if @p1.position.y < 14
             if @tab[@p1.position.x][@p1.position.y+1].moveable==true
               TweenLite.to(@p1.position, @p1.speed, {y:@p1.position.y+1, ease:Linear.easeNone})
@@ -101,7 +102,6 @@ class BS
               pozx=@obstacles[@p1.position.x][@p1.position.y].posX
               pozy=@obstacles[@p1.position.x][@p1.position.y].posY
               @stage.addChild(@obstacles[@p1.position.x][@p1.position.y].sprite);
-#              @stage.addChildAt(@obstacles[@p1.position.x][@p1.position.y].sprite,225)
               @tab[@p1.position.x][@p1.position.y].moveable=false
               @p1.bombCount--
               setTimeout(

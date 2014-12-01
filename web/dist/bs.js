@@ -18,6 +18,7 @@ BS = (function() {
     this.p1 = new Player(this.scale);
     this.stage.addChild(this.p1.sprite);
     this.p1.scale = this.scale;
+    console.log(this.scale);
   }
 
   BS.prototype.makeWorld = function() {

@@ -13,10 +13,6 @@ Explosion = (function() {
     this.sprite.scale.x = this.sprite.scale.y = scale;
   }
 
-  Explosion.prototype.explosionClear = function(x, y) {
-    return basicScene.stage.removeChildAt(224);
-  };
-
   return Explosion;
 
 })();
