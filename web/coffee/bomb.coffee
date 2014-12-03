@@ -7,7 +7,24 @@ class Bomb
     @sprite.scale.x=@sprite.scale.y=scale
     @posX = x
     @posY = y
+    @bombTab = [
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 
+    ];
 
 
 
@@ -24,12 +41,12 @@ class Bomb
     for i in [1 .. basicScene.p1.bombRange]
       if (x <14 && typeof basicScene.tab[x+i] isnt 'undefined')
         if(basicScene.tab[x+i][y].stone==false)
-          basicScene.obstacles[x+i][y]= new Explosion(x+i,y,basicScene.scale,1)
-          basicScene.stage.addChild(basicScene.obstacles[x+i][y].sprite)
+          @createFlame(x+i,y,basicScene.scale,1)
+          basicScene.stage.addChild(@bombTab[x+i][y])
           px=x+i
-          do (px) ->
+          do (px,y,@bombTab) ->
             setTimeout(
-              -> basicScene.stage.removeChild(basicScene.obstacles[px][y].sprite)
+              -> basicScene.stage.removeChild(@bombTab[px][y])
               1500
             )
           if(basicScene.tab[x+i][y].destructable==true)
@@ -42,12 +59,12 @@ class Bomb
     for i in [1 .. basicScene.p1.bombRange]
       if (x>=1 && typeof basicScene.tab[x-i] isnt 'undefined')
         if(basicScene.tab[x-i][y].stone==false)
-          basicScene.obstacles[x-i][y]= new Explosion(x-i,y,basicScene.scale,1)
-          basicScene.stage.addChild(basicScene.obstacles[x-i][y].sprite)
+          @createFlame(x-i,y,basicScene.scale,1)
+          basicScene.stage.addChild(@bombTab[x-i][y])
           px=x-i
-          do(px) ->
+          do(px,y,@bombTab) ->
             setTimeout(
-              -> basicScene.stage.removeChild(basicScene.obstacles[px][y].sprite)
+              -> basicScene.stage.removeChild(@bombTab[px][y])
               1500
             )
           if(basicScene.tab[x-i][y].destructable==true)
@@ -60,12 +77,12 @@ class Bomb
     for i in [1 .. basicScene.p1.bombRange]
       if (y<14 && typeof basicScene.tab[x][y+i] isnt 'undefined')
         if(basicScene.tab[x][y+i].stone==false)
-          basicScene.obstacles[x][y+i]= new Explosion(x,y+i,basicScene.scale,2)
-          basicScene.stage.addChild(basicScene.obstacles[x][y+i].sprite)
+          @createFlame(x,y+i,basicScene.scale,2)
+          basicScene.stage.addChild(@bombTab[x][y+i])
           py=y+i
-          do(py) ->
+          do(x,py,@bombTab) ->
             setTimeout(
-              -> basicScene.stage.removeChild(basicScene.obstacles[x][py].sprite)
+              -> basicScene.stage.removeChild(@bombTab[x][py])
               1500
             )
           if(basicScene.tab[x][y+i].destructable==true)
@@ -78,12 +95,12 @@ class Bomb
     for i in [1 .. basicScene.p1.bombRange]
       if (y >=1 && typeof basicScene.tab[x][y-i] isnt 'undefined')
         if(basicScene.tab[x][y-i].stone==false)
-          basicScene.obstacles[x][y-i]= new Explosion(x,y-i,basicScene.scale,2)
-          basicScene.stage.addChild(basicScene.obstacles[x][y-i].sprite)
+          @createFlame(x,y-i,basicScene.scale,2)
+          basicScene.stage.addChild(@bombTab[x][y-i])
           py=y-i
-          do(py) ->
+          do(py,@bombTab,x) ->
             setTimeout(
-              -> basicScene.stage.removeChild(basicScene.obstacles[x][py].sprite)
+              -> basicScene.stage.removeChild(@bombTab[x][py])
               1500
             )
           if(basicScene.tab[x][y-i].destructable==true)
@@ -95,10 +112,18 @@ class Bomb
       break if breakloop
     breakloop=false
 
+  createFlame:(x,y,scale,direction) ->
+    if (direction == 1)
+      @bombTab[x][y]=new PIXI.Sprite(PIXI.Texture.fromImage('images/exp_hor.jpg'))
+    if (direction == 2)
+      @bombTab[x][y]=new PIXI.Sprite(PIXI.Texture.fromImage('images/exp_vert.jpg'))
+    @bombTab[x][y].position.x=x*50*scale
+    @bombTab[x][y].position.y=y*50*scale
+    @bombTab[x][y].scale.x=@bombTab[x][y].scale.y=scale
 
 
 
-  afterExplode= (x,y) -> #change destructable block to white - moveable
+  afterExplode= (x,y) -> #change destructable block to white -> moveable
     basicScene.tab[x][y].sprite.setTexture(PIXI.Texture.fromImage('images/white.jpg'))
     basicScene.tab[x][y].moveable=true
 

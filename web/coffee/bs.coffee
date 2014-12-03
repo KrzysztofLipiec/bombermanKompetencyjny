@@ -14,7 +14,6 @@ class BS
     @p1 = new Player(@scale)
     @stage.addChild(@p1.sprite)
     @p1.scale=@scale
-    console.log(@scale)
 
   makeWorld: ->
     @tab = [
