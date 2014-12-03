@@ -25,9 +25,26 @@ class Bomb
       [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 
     ];
+  createFlame: (orientation)->
+    switch orientation
+      when "vertical" then
+        top = true
+        bottom = true
+        for i in [1 .. basicScene.p1.bombRange]
+          break if not top and not bottom
+          if top
+
+          if bottom
 
 
 
+  exp: (x, y)->
+    basicScene.obstacles[x][y].sprite.setTexture(PIXI.Texture.fromImage('images/explosion.png'))
+    basicScene.tab[x][y].moveable=true
+    basicScene.p1.bombCount++
+
+    @createFlame("vertical")
+    @createFlame("horizontal")
 
   explode: (x,y)->
     basicScene.obstacles[x][y].sprite.setTexture(PIXI.Texture.fromImage('images/explosion.png'))
@@ -38,6 +55,7 @@ class Bomb
       -> basicScene.stage.removeChild(basicScene.obstacles[x][y].sprite)
       1500
     )
+
     for i in [1 .. basicScene.p1.bombRange]
       if (x <14 && typeof basicScene.tab[x+i] isnt 'undefined')
         if(basicScene.tab[x+i][y].stone==false)
@@ -56,6 +74,7 @@ class Bomb
           breakloop=true
       break if breakloop
     breakloop=false
+
     for i in [1 .. basicScene.p1.bombRange]
       if (x>=1 && typeof basicScene.tab[x-i] isnt 'undefined')
         if(basicScene.tab[x-i][y].stone==false)
@@ -74,6 +93,7 @@ class Bomb
           breakloop=true
       break if breakloop
     breakloop=false
+
     for i in [1 .. basicScene.p1.bombRange]
       if (y<14 && typeof basicScene.tab[x][y+i] isnt 'undefined')
         if(basicScene.tab[x][y+i].stone==false)
@@ -92,6 +112,7 @@ class Bomb
           breakloop=true
       break if breakloop
     breakloop=false
+
     for i in [1 .. basicScene.p1.bombRange]
       if (y >=1 && typeof basicScene.tab[x][y-i] isnt 'undefined')
         if(basicScene.tab[x][y-i].stone==false)
@@ -112,7 +133,7 @@ class Bomb
       break if breakloop
     breakloop=false
 
-  createFlame:(x,y,scale,direction) ->
+  makeFlame:(x,y,scale,direction) ->
     if (direction == 1)
       @bombTab[x][y]=new PIXI.Sprite(PIXI.Texture.fromImage('images/exp_hor.jpg'))
     if (direction == 2)
