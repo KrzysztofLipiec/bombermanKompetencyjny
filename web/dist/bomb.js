@@ -1,153 +1,152 @@
 var Bomb;
 
 Bomb = (function() {
-  var afterExplode;
-
   function Bomb(x, y, scale) {
+    this.bomb = true;
     this.sprite = new PIXI.Sprite(PIXI.Texture.fromImage('images/bomb.png'));
     this.sprite.position.x = x * 50 * scale;
     this.sprite.position.y = y * 50 * scale;
     this.sprite.scale.x = this.sprite.scale.y = scale;
     this.posX = x;
     this.posY = y;
-    this.bombTab = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]];
+    this.flameTab = [];
+    this.exploded = true;
   }
 
-  Bomb.prototype.makeFlame = function(direction) {};
+  Bomb.prototype.createFlame = function(orientation) {
+    var bottom, i, left, right, top, _i, _j, _ref, _ref1, _results, _results1;
+    switch (orientation) {
+      case "vertical":
+        top = true;
+        bottom = true;
+        _results = [];
+        for (i = _i = 1, _ref = basicScene.p1.bombRange; 1 <= _ref ? _i <= _ref : _i >= _ref; i = 1 <= _ref ? ++_i : --_i) {
+          if (top) {
+            if (this.posY < 14 && typeof basicScene.tab[this.posY + i] !== 'undefined') {
+              if (basicScene.obstacles[this.posX][this.posY + i].exploded) {
+                top = false;
+              }
+              if (basicScene.tab[this.posX][this.posY + i].stone === false) {
+                this.flameTab.push(new Explosion(this.posX, this.posY + i, basicScene.scale, 2));
+                if (basicScene.tab[this.posX][this.posY + i].destructable === true) {
+                  this.afterExplode(this.posX, this.posY + i);
+                  top = false;
+                }
+              } else {
+                top = false;
+              }
+            }
+          }
+          if (bottom) {
+            if (this.posY >= 1 && typeof basicScene.tab[this.posY - i] !== 'undefined') {
+              if (basicScene.obstacles[this.posX][this.posY - i].exploded) {
+                bottom = false;
+              }
+              if (basicScene.tab[this.posX][this.posY - i].stone === false) {
+                this.flameTab.push(new Explosion(this.posX, this.posY - i, basicScene.scale, 2));
+                if (basicScene.tab[this.posX][this.posY - i].destructable === true) {
+                  this.afterExplode(this.posX, this.posY - i);
+                  _results.push(bottom = false);
+                } else {
+                  _results.push(void 0);
+                }
+              } else {
+                _results.push(bottom = false);
+              }
+            } else {
+              _results.push(void 0);
+            }
+          } else {
+            _results.push(void 0);
+          }
+        }
+        return _results;
+        break;
+      case "horizontal":
+        right = true;
+        left = true;
+        _results1 = [];
+        for (i = _j = 1, _ref1 = basicScene.p1.bombRange; 1 <= _ref1 ? _j <= _ref1 : _j >= _ref1; i = 1 <= _ref1 ? ++_j : --_j) {
+          if (right) {
+            if (this.posX < 14 && typeof basicScene.tab[this.posX + i] !== 'undefined') {
+              if (basicScene.obstacles[this.posX + i][this.posY].bomb) {
+                right = false;
+              }
+              if (basicScene.tab[this.posX + i][this.posY].stone === false) {
+                this.flameTab.push(new Explosion(this.posX + i, this.posY, basicScene.scale, 1));
+                if (basicScene.tab[this.posX + i][this.posY].destructable === true) {
+                  this.afterExplode(this.posX + i, this.posY);
+                  right = false;
+                }
+              } else {
+                right = false;
+              }
+            }
+          }
+          if (left) {
+            if (this.posX >= 1 && typeof basicScene.tab[this.posX - i] !== 'undefined') {
+              if (basicScene.obstacles[this.posX - i][this.posY].bomb) {
+                left = false;
+              }
+              if (basicScene.tab[this.posX - i][this.posY].stone === false) {
+                this.flameTab.push(new Explosion(this.posX - i, this.posY, basicScene.scale, 1));
+                if (basicScene.tab[this.posX - i][this.posY].destructable === true) {
+                  this.afterExplode(this.posX - i, this.posY);
+                  _results1.push(left = false);
+                } else {
+                  _results1.push(void 0);
+                }
+              } else {
+                _results1.push(left = false);
+              }
+            } else {
+              _results1.push(void 0);
+            }
+          } else {
+            _results1.push(void 0);
+          }
+        }
+        return _results1;
+    }
+  };
+
+  Bomb.prototype.clearFlame = function() {
+    var i, _i, _ref;
+    for (i = _i = 0, _ref = this.flameTab.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+      basicScene.stage.removeChild(this.flameTab[i].sprite);
+      basicScene.stage.removeChild(basicScene.obstacles[this.posX][this.posY].sprite);
+    }
+    return basicScene.bombsTab.shift();
+  };
 
   Bomb.prototype.exp = function(x, y) {
+    var i, _i, _ref;
+    this.exploded = false;
     basicScene.obstacles[x][y].sprite.setTexture(PIXI.Texture.fromImage('images/explosion.png'));
     basicScene.tab[x][y].moveable = true;
     basicScene.p1.bombCount++;
-    return this.makeFlame();
+    this.createFlame("vertical");
+    this.createFlame("horizontal");
+    for (i = _i = 0, _ref = this.flameTab.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+      basicScene.stage.addChild(this.flameTab[i].sprite);
+    }
+    return setTimeout(this.clearFlame.bind(this), 1500);
   };
 
-  Bomb.prototype.explode = function(x, y) {
-    var breakloop, i, px, py, _i, _j, _k, _l, _ref, _ref1, _ref2, _ref3;
-    basicScene.obstacles[x][y].sprite.setTexture(PIXI.Texture.fromImage('images/explosion.png'));
-    basicScene.tab[x][y].moveable = true;
-    basicScene.p1.bombCount++;
-    breakloop = false;
-    setTimeout(function() {
-      return basicScene.stage.removeChild(basicScene.obstacles[x][y].sprite);
-    }, 1500);
-    for (i = _i = 1, _ref = basicScene.p1.bombRange; 1 <= _ref ? _i <= _ref : _i >= _ref; i = 1 <= _ref ? ++_i : --_i) {
-      if (x < 14 && typeof basicScene.tab[x + i] !== 'undefined') {
-        if (basicScene.tab[x + i][y].stone === false) {
-          this.createFlame(x + i, y, basicScene.scale, 1);
-          basicScene.stage.addChild(this.bombTab[x + i][y]);
-          px = x + i;
-          (function(px, y, bombTab) {
-            this.bombTab = bombTab;
-            return setTimeout(function() {
-              return basicScene.stage.removeChild(this.bombTab[px][y]);
-            }, 1500);
-          })(px, y, this.bombTab);
-          if (basicScene.tab[x + i][y].destructable === true) {
-            afterExplode(x + i, y);
-            breakloop = true;
-          }
-        } else {
-          breakloop = true;
-        }
-      }
-      if (breakloop) {
-        break;
-      }
+  Bomb.prototype.afterExplode = function(x, y) {
+    var rand;
+    rand = Math.floor(Math.random() * 3);
+    console.log(rand);
+    basicScene.tab[x][y] = new Grass(x, y, basicScene.scale);
+    basicScene.stage.addChild(basicScene.tab[x][y].sprite);
+    switch (rand) {
+      case 0:
+        basicScene.obstacles[x][y] = new Bonus(x, y, basicScene.scale, "hearth");
+        return basicScene.stage.addChild(basicScene.obstacles[x][y].sprite);
+      case 1:
+        basicScene.obstacles[x][y] = new Bonus(x, y, basicScene.scale, "bombPlus");
+        return basicScene.stage.addChild(basicScene.obstacles[x][y].sprite);
     }
-    breakloop = false;
-    for (i = _j = 1, _ref1 = basicScene.p1.bombRange; 1 <= _ref1 ? _j <= _ref1 : _j >= _ref1; i = 1 <= _ref1 ? ++_j : --_j) {
-      if (x >= 1 && typeof basicScene.tab[x - i] !== 'undefined') {
-        if (basicScene.tab[x - i][y].stone === false) {
-          this.createFlame(x - i, y, basicScene.scale, 1);
-          basicScene.stage.addChild(this.bombTab[x - i][y]);
-          px = x - i;
-          (function(px, y, bombTab) {
-            this.bombTab = bombTab;
-            return setTimeout(function() {
-              return basicScene.stage.removeChild(this.bombTab[px][y]);
-            }, 1500);
-          })(px, y, this.bombTab);
-          if (basicScene.tab[x - i][y].destructable === true) {
-            afterExplode(x - i, y);
-            breakloop = true;
-          }
-        } else {
-          breakloop = true;
-        }
-      }
-      if (breakloop) {
-        break;
-      }
-    }
-    breakloop = false;
-    for (i = _k = 1, _ref2 = basicScene.p1.bombRange; 1 <= _ref2 ? _k <= _ref2 : _k >= _ref2; i = 1 <= _ref2 ? ++_k : --_k) {
-      if (y < 14 && typeof basicScene.tab[x][y + i] !== 'undefined') {
-        if (basicScene.tab[x][y + i].stone === false) {
-          this.createFlame(x, y + i, basicScene.scale, 2);
-          basicScene.stage.addChild(this.bombTab[x][y + i]);
-          py = y + i;
-          (function(x, py, bombTab) {
-            this.bombTab = bombTab;
-            return setTimeout(function() {
-              return basicScene.stage.removeChild(this.bombTab[x][py]);
-            }, 1500);
-          })(x, py, this.bombTab);
-          if (basicScene.tab[x][y + i].destructable === true) {
-            afterExplode(x, y + i);
-            breakloop = true;
-          }
-        } else {
-          breakloop = true;
-        }
-      }
-      if (breakloop) {
-        break;
-      }
-    }
-    breakloop = false;
-    for (i = _l = 1, _ref3 = basicScene.p1.bombRange; 1 <= _ref3 ? _l <= _ref3 : _l >= _ref3; i = 1 <= _ref3 ? ++_l : --_l) {
-      if (y >= 1 && typeof basicScene.tab[x][y - i] !== 'undefined') {
-        if (basicScene.tab[x][y - i].stone === false) {
-          this.createFlame(x, y - i, basicScene.scale, 2);
-          basicScene.stage.addChild(this.bombTab[x][y - i]);
-          py = y - i;
-          (function(py, bombTab, x) {
-            this.bombTab = bombTab;
-            return setTimeout(function() {
-              return basicScene.stage.removeChild(this.bombTab[x][py]);
-            }, 1500);
-          })(py, this.bombTab, x);
-          if (basicScene.tab[x][y - i].destructable === true) {
-            afterExplode(x, y - i);
-            breakloop = true;
-          }
-        } else {
-          breakloop = true;
-        }
-      }
-      if (breakloop) {
-        break;
-      }
-    }
-    return breakloop = false;
-  };
-
-  Bomb.prototype.createFlame = function(x, y, scale, direction) {
-    if (direction === 1) {
-      this.bombTab[x][y] = new PIXI.Sprite(PIXI.Texture.fromImage('images/exp_hor.jpg'));
-    }
-    if (direction === 2) {
-      this.bombTab[x][y] = new PIXI.Sprite(PIXI.Texture.fromImage('images/exp_vert.jpg'));
-    }
-    this.bombTab[x][y].position.x = x * 50 * scale;
-    this.bombTab[x][y].position.y = y * 50 * scale;
-    return this.bombTab[x][y].scale.x = this.bombTab[x][y].scale.y = scale;
-  };
-
-  afterExplode = function(x, y) {
-    basicScene.tab[x][y].sprite.setTexture(PIXI.Texture.fromImage('images/white.jpg'));
-    return basicScene.tab[x][y].moveable = true;
   };
 
   return Bomb;

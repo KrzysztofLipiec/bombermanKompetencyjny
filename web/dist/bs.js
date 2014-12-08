@@ -24,6 +24,7 @@ BS = (function() {
     var i, j, _i, _ref, _results;
     this.tab = [[0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0], [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0], [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0], [0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 2, 1, 0, 1, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0], [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]];
     this.obstacles = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]];
+    this.bombsTab = [];
     _results = [];
     for (j = _i = 0, _ref = this.tab.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; j = 0 <= _ref ? ++_i : --_i) {
       _results.push((function() {
@@ -59,6 +60,21 @@ BS = (function() {
     return this.p1.update();
   };
 
+  BS.prototype.checkObstacle = function(x, y) {
+    if (this.obstacles[x][y].bonus) {
+      switch (this.obstacles[x][y].bonus) {
+        case "hearth":
+          this.stage.removeChild(this.obstacles[x][y].sprite);
+          this.p1.lifes++;
+          return this.obstacles[x][y].sprite = 0;
+        case "bombPlus":
+          this.stage.removeChild(this.obstacles[x][y].sprite);
+          this.p1.bombCount++;
+          return this.obstacles[x][y].sprite = 0;
+      }
+    }
+  };
+
   BS.prototype.keyDownTextField = function(e) {
     var keyCode, pozx, pozy;
     keyCode = e.keyCode;
@@ -71,7 +87,8 @@ BS = (function() {
                 x: this.p1.position.x - 1,
                 ease: Linear.easeNone
               });
-              return this.p1.sprite.setTexture(PIXI.Texture.fromImage('images/left.png'));
+              this.p1.sprite.setTexture(PIXI.Texture.fromImage('images/left.png'));
+              return this.checkObstacle(this.p1.position.x - 1, this.p1.position.y);
             }
           }
           break;
@@ -82,7 +99,8 @@ BS = (function() {
                 x: this.p1.position.x + 1,
                 ease: Linear.easeNone
               });
-              return this.p1.sprite.setTexture(PIXI.Texture.fromImage('images/right.png'));
+              this.p1.sprite.setTexture(PIXI.Texture.fromImage('images/right.png'));
+              return this.checkObstacle(this.p1.position.x + 1, this.p1.position.y);
             }
           }
           break;
@@ -93,7 +111,8 @@ BS = (function() {
                 y: this.p1.position.y - 1,
                 ease: Linear.easeNone
               });
-              return this.p1.sprite.setTexture(PIXI.Texture.fromImage('images/up.png'));
+              this.p1.sprite.setTexture(PIXI.Texture.fromImage('images/up.png'));
+              return this.checkObstacle(this.p1.position.x, this.p1.position.y - 1);
             }
           }
           break;
@@ -104,20 +123,22 @@ BS = (function() {
                 y: this.p1.position.y + 1,
                 ease: Linear.easeNone
               });
-              return this.p1.sprite.setTexture(PIXI.Texture.fromImage('images/down.png'));
+              this.p1.sprite.setTexture(PIXI.Texture.fromImage('images/down.png'));
+              return this.checkObstacle(this.p1.position.x, this.p1.position.y + 1);
             }
           }
           break;
         case 32:
           if (this.p1.bombCount > 0) {
             this.obstacles[this.p1.position.x][this.p1.position.y] = new Bomb(this.p1.position.x, this.p1.position.y, this.scale);
+            this.bombsTab.push(this.obstacles[this.p1.position.x][this.p1.position.y]);
             pozx = this.obstacles[this.p1.position.x][this.p1.position.y].posX;
             pozy = this.obstacles[this.p1.position.x][this.p1.position.y].posY;
             this.stage.addChild(this.obstacles[this.p1.position.x][this.p1.position.y].sprite);
             this.tab[this.p1.position.x][this.p1.position.y].moveable = false;
             this.p1.bombCount--;
             return setTimeout(function() {
-              return basicScene.obstacles[pozx][pozy].explode(pozx, pozy);
+              return basicScene.obstacles[pozx][pozy].exp(pozx, pozy);
             }, 3000);
           }
       }

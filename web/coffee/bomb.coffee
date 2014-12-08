@@ -1,151 +1,116 @@
 class Bomb
   constructor: (x,y,scale)->
 
+    @bomb = true
     @sprite = new PIXI.Sprite(PIXI.Texture.fromImage('images/bomb.png'));
     @sprite.position.x=x*50*scale
     @sprite.position.y=y*50*scale
     @sprite.scale.x=@sprite.scale.y=scale
     @posX = x
     @posY = y
-    @bombTab = [
-      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    @flameTab = []
+    @exploded = true
 
-    ];
   createFlame: (orientation)->
+
     switch orientation
-      when "vertical" then
+      when "vertical"
         top = true
         bottom = true
         for i in [1 .. basicScene.p1.bombRange]
-          break if not top and not bottom
+
           if top
+            if (@posY <14 and typeof basicScene.tab[@posY+i] isnt 'undefined')
+              if (basicScene.obstacles[@posX][@posY+i].exploded )
+                #@exp(@posX,@posY+i)
+                top=false
+              if(basicScene.tab[@posX][@posY+i].stone==false)
+                @flameTab.push(new Explosion(@posX,@posY+i,basicScene.scale,2))
+                if(basicScene.tab[@posX][@posY+i].destructable==true)
+                  @afterExplode(@posX,@posY+i)
+                  top=false
+              else
+                top = false
 
           if bottom
+            if (@posY >=1 and typeof basicScene.tab[@posY-i] isnt 'undefined')
+              if (basicScene.obstacles[@posX][@posY-i].exploded)
+                #@exp(@posX,@posY-i)
+                bottom=false
+              if basicScene.tab[@posX][@posY-i].stone==false
+                @flameTab.push(new Explosion(@posX,@posY-i,basicScene.scale,2))
+                if(basicScene.tab[@posX][@posY-i].destructable==true)
+                  @afterExplode(@posX,@posY-i)
+                  bottom=false
+
+              else
+                bottom = false
+
+      when "horizontal"
+        right = true
+        left = true
+        for i in [1 .. basicScene.p1.bombRange]
+
+          if right
+            if (@posX <14 and typeof basicScene.tab[@posX+i] isnt 'undefined')
+              if(basicScene.obstacles[@posX+i][@posY].bomb)
+                #@exp(@posX+i,@posY)
+                right=false
+              if(basicScene.tab[@posX+i][@posY].stone==false)
+                @flameTab.push(new Explosion(@posX+i,@posY,basicScene.scale,1))
+                if(basicScene.tab[@posX+i][@posY].destructable==true)
+                  @afterExplode(@posX+i,@posY)
+                  right=false
+
+              else
+                right = false
+
+          if left
+            if (@posX >=1 and typeof basicScene.tab[@posX-i] isnt 'undefined')
+              if(basicScene.obstacles[@posX-i][@posY].bomb)
+                #@exp(@posX-i,@posY)
+                left=false
+              if basicScene.tab[@posX-i][@posY].stone==false
+                @flameTab.push(new Explosion(@posX-i,@posY,basicScene.scale,1))
+                if(basicScene.tab[@posX-i][@posY].destructable==true)
+                  @afterExplode(@posX-i,@posY)
+                  left=false
+
+              else
+                left = false
 
 
 
+  clearFlame: ->
+    for i in [0 .. @flameTab.length-1]
+      basicScene.stage.removeChild(@flameTab[i].sprite)
+      basicScene.stage.removeChild(basicScene.obstacles[@posX][@posY].sprite)
+    basicScene.bombsTab.shift()
   exp: (x, y)->
+    @exploded=false
     basicScene.obstacles[x][y].sprite.setTexture(PIXI.Texture.fromImage('images/explosion.png'))
     basicScene.tab[x][y].moveable=true
     basicScene.p1.bombCount++
+
 
     @createFlame("vertical")
     @createFlame("horizontal")
-
-  explode: (x,y)->
-    basicScene.obstacles[x][y].sprite.setTexture(PIXI.Texture.fromImage('images/explosion.png'))
-    basicScene.tab[x][y].moveable=true
-    basicScene.p1.bombCount++
-    breakloop=false
-    setTimeout(
-      -> basicScene.stage.removeChild(basicScene.obstacles[x][y].sprite)
-      1500
-    )
-
-    for i in [1 .. basicScene.p1.bombRange]
-      if (x <14 && typeof basicScene.tab[x+i] isnt 'undefined')
-        if(basicScene.tab[x+i][y].stone==false)
-          @createFlame(x+i,y,basicScene.scale,1)
-          basicScene.stage.addChild(@bombTab[x+i][y])
-          px=x+i
-          do (px,y,@bombTab) ->
-            setTimeout(
-              -> basicScene.stage.removeChild(@bombTab[px][y])
-              1500
-            )
-          if(basicScene.tab[x+i][y].destructable==true)
-            afterExplode(x+i,y)
-            breakloop=true
-        else
-          breakloop=true
-      break if breakloop
-    breakloop=false
-
-    for i in [1 .. basicScene.p1.bombRange]
-      if (x>=1 && typeof basicScene.tab[x-i] isnt 'undefined')
-        if(basicScene.tab[x-i][y].stone==false)
-          @createFlame(x-i,y,basicScene.scale,1)
-          basicScene.stage.addChild(@bombTab[x-i][y])
-          px=x-i
-          do(px,y,@bombTab) ->
-            setTimeout(
-              -> basicScene.stage.removeChild(@bombTab[px][y])
-              1500
-            )
-          if(basicScene.tab[x-i][y].destructable==true)
-            afterExplode(x-i,y)
-            breakloop=true
-        else
-          breakloop=true
-      break if breakloop
-    breakloop=false
-
-    for i in [1 .. basicScene.p1.bombRange]
-      if (y<14 && typeof basicScene.tab[x][y+i] isnt 'undefined')
-        if(basicScene.tab[x][y+i].stone==false)
-          @createFlame(x,y+i,basicScene.scale,2)
-          basicScene.stage.addChild(@bombTab[x][y+i])
-          py=y+i
-          do(x,py,@bombTab) ->
-            setTimeout(
-              -> basicScene.stage.removeChild(@bombTab[x][py])
-              1500
-            )
-          if(basicScene.tab[x][y+i].destructable==true)
-            afterExplode(x,y+i)
-            breakloop=true
-        else
-          breakloop=true
-      break if breakloop
-    breakloop=false
-
-    for i in [1 .. basicScene.p1.bombRange]
-      if (y >=1 && typeof basicScene.tab[x][y-i] isnt 'undefined')
-        if(basicScene.tab[x][y-i].stone==false)
-          @createFlame(x,y-i,basicScene.scale,2)
-          basicScene.stage.addChild(@bombTab[x][y-i])
-          py=y-i
-          do(py,@bombTab,x) ->
-            setTimeout(
-              -> basicScene.stage.removeChild(@bombTab[x][py])
-              1500
-            )
-          if(basicScene.tab[x][y-i].destructable==true)
-
-            afterExplode(x,y-i)
-            breakloop=true
-        else
-          breakloop=true
-      break if breakloop
-    breakloop=false
-
-  makeFlame:(x,y,scale,direction) ->
-    if (direction == 1)
-      @bombTab[x][y]=new PIXI.Sprite(PIXI.Texture.fromImage('images/exp_hor.jpg'))
-    if (direction == 2)
-      @bombTab[x][y]=new PIXI.Sprite(PIXI.Texture.fromImage('images/exp_vert.jpg'))
-    @bombTab[x][y].position.x=x*50*scale
-    @bombTab[x][y].position.y=y*50*scale
-    @bombTab[x][y].scale.x=@bombTab[x][y].scale.y=scale
+    for i in [0 .. @flameTab.length-1]
+      basicScene.stage.addChild(@flameTab[i].sprite)
+    setTimeout(@clearFlame.bind(@),1500)
 
 
 
-  afterExplode= (x,y) -> #change destructable block to white -> moveable
-    basicScene.tab[x][y].sprite.setTexture(PIXI.Texture.fromImage('images/white.jpg'))
-    basicScene.tab[x][y].moveable=true
+  afterExplode: (x,y) ->
+    rand = Math.floor(Math.random() *3)
+    console.log(rand)
+    basicScene.tab[x][y] = new Grass(x,y,basicScene.scale)
+    basicScene.stage.addChild(basicScene.tab[x][y].sprite)
+    switch rand
+      when 0
+        basicScene.obstacles[x][y] = new Bonus(x,y,basicScene.scale,"hearth")
+        basicScene.stage.addChild(basicScene.obstacles[x][y].sprite)
 
-
+      when 1
+        basicScene.obstacles[x][y] = new Bonus(x,y,basicScene.scale,"bombPlus")
+        basicScene.stage.addChild(basicScene.obstacles[x][y].sprite)
