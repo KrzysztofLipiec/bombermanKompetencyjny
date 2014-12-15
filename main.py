@@ -1,26 +1,34 @@
+#!/usr/bin/python
 # coding=utf-8
 import datetime
 import json
-import pickle
+import new
+import os
 import time
 import uuid
+import webbrowser
+from google.appengine.ext.webapp import template
+import webapp2
 
+from websocket import create_connection
 from google.appengine.datastore import entity_pb
 from google.appengine.ext import db
 from google.appengine.ext import webapp
 from google.appengine.api import users
 from google.appengine.api import memcache
 
-import webapp2
-from google.appengine.api import users
-#
+import os
+import logging
+import wsgiref.handlers
+from google.appengine.ext import webapp
+
 # def switch_accounts(request):
 # """ View function for allowing a user to switch Google accounts.
 # Requires 'destination_url' in the query string for the URL
 # to redirect the user to after they have switched accounts.
 # """
-#     current_user_id = get_current_user().user_id()
-#     previous_user_id = request.session.get('original_user_id')
+# current_user_id = get_current_user().user_id()
+# previous_user_id = request.session.get('original_user_id')
 #     if previous_user_id and previous_user_id != current_user_id:
 #         #They have successfully switched accounts
 #         del request.session['original_user_id']
@@ -40,8 +48,28 @@ from google.appengine.api import users
 
 class StronaGlowna(webapp.RequestHandler):
     def get(self):
-        self.response.headers['Content-Type'] = 'text/plain'
-        self.response.out.write('Hello, webapp World!')
+        ws = create_connection("ws://localhost:8080/websocket")
+        print "Sending 'Hello, World'..."
+        ws.send("Hello, World")
+        print "Sent"
+        print "Reeiving..."
+        result =  ws.recv()
+        print "Received '%s'" % result
+        ws.close()
+
+        # temp = os.path.join(
+        #     os.path.dirname(__file__),
+        #     'templates/index.htm')
+        # outstr = template.render(
+        #     temp,
+        #     {'hint': 'Good luck!'})
+        # self.response.out.write(outstr)
+
+        indeks = "file://C:/Users/Daniel/bombermanKompetencyjny/web/dist/index.html"
+        webbrowser.open(indeks, new=new)
+
+        # self.response.headers['Content-Type'] = 'text/plain'
+        # self.response.out.write('Hello, webapp World!')
 
 
 class LoginHandler(webapp2.RequestHandler):
@@ -63,17 +91,6 @@ class LoginHandler(webapp2.RequestHandler):
 
 
 application = webapp2.WSGIApplication([('/Login2', LoginHandler), ], debug=True)
-
-# if user:
-#     self.response.headers['Content-Type'] = 'text/plain'
-#     self.response.write('Hello, ' + user.nickname())
-# else:
-#     self.redirect(users.create_login_url(self.request.uri))
-
-#self.redirect('/Register')
-#def post(self):
-#   user = self.request.get_current_user()
-#  self.redirect('/Login')
 
 
 class Memcache(webapp.RequestHandler):
@@ -123,9 +140,6 @@ class Emp(db.Model):
     role = db.StringProperty(required=True)
     times = 10000
 
-    # first_name = db.StringProperty(notrequired=True)
-    # last_name = db.StringProperty(notrequired=True)
-
     def to_dict(self):
         return dict([(p, unicode(getattr(self, p))) for p in self.properties()])
 
@@ -136,7 +150,7 @@ class AddEmp(webapp.RequestHandler):
                 role="manager")
 
         e.put()
-        self.response.out.write('Hi: '+e.name+" "+e.role)
+        self.response.out.write('Hi: ' + e.name + " " + e.role)
 
 
 class Test(webapp.RequestHandler):
