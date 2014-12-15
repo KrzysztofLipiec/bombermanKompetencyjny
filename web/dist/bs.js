@@ -15,9 +15,10 @@ BS = (function() {
     this.renderer = PIXI.autoDetectRenderer(this.sizex, this.sizey);
     document.body.appendChild(this.renderer.view);
     this.makeWorld();
-    this.p1 = new Player(this.scale);
-    this.stage.addChild(this.p1.sprite);
-    this.p1.scale = this.scale;
+    this.me = new Player(this.scale, 0, 0);
+    this.stage.addChild(this.me.sprite);
+    this.enemy = new Player(this.scale, 14, 14);
+    this.stage.addChild(this.enemy.sprite);
   }
 
   BS.prototype.makeWorld = function() {
@@ -54,93 +55,151 @@ BS = (function() {
     return _results;
   };
 
+  BS.prototype.enemyRandom = function() {
+    var rand;
+    setTimeout(this.enemyRandom.bind(this), 500);
+    rand = Math.floor(Math.random() * 4);
+    switch (rand) {
+      case 0:
+        return this.moveLeft(this.enemy);
+      case 1:
+        return this.moveRight(this.enemy);
+      case 2:
+        return this.moveUp(this.enemy);
+      case 3:
+        return this.moveDown(this.enemy);
+      case 4:
+        return this.placeBomb(basicScene.enemy);
+    }
+  };
+
   BS.prototype.frame = function() {
     setTimeout(this.frame.bind(this), 60 / 1000);
     this.renderer.render(this.stage);
-    return this.p1.update();
+    this.me.update();
+    return this.enemy.update();
   };
 
-  BS.prototype.checkObstacle = function(x, y) {
+  BS.prototype.checkObstacle = function(x, y, player) {
     if (this.obstacles[x][y].bonus) {
       switch (this.obstacles[x][y].bonus) {
         case "hearth":
           this.stage.removeChild(this.obstacles[x][y].sprite);
-          this.p1.lifes++;
-          return this.obstacles[x][y].sprite = 0;
+          player.lifes++;
+          return this.obstacles[x][y] = 0;
         case "bombPlus":
           this.stage.removeChild(this.obstacles[x][y].sprite);
-          this.p1.bombCount++;
-          return this.obstacles[x][y].sprite = 0;
+          player.bombRange++;
+          return this.obstacles[x][y] = 0;
+      }
+    }
+  };
+
+  BS.prototype.makeMoveable = function(x, y) {
+    return basicScene.tab[x][y].moveable = true;
+  };
+
+  BS.prototype.moveLeft = function(player) {
+    if (player.position.x >= 1) {
+      if (this.tab[player.position.x - 1][player.position.y].moveable) {
+        this.tab[player.position.x][player.position.y].moveable = false;
+        this.tab[player.position.x - 1][player.position.y].moveable = false;
+        TweenLite.to(player.position, player.speed, {
+          x: player.position.x - 1,
+          ease: Linear.easeNone,
+          onComplete: this.makeMoveable,
+          onCompleteParams: [player.position.x, player.position.y]
+        });
+        player.sprite.setTexture(PIXI.Texture.fromImage('images/left.png'));
+        return this.checkObstacle(player.position.x - 1, player.position.y, player);
+      }
+    }
+  };
+
+  BS.prototype.moveRight = function(player) {
+    if (player.position.x < 14) {
+      if (this.tab[player.position.x + 1][player.position.y].moveable) {
+        this.tab[player.position.x][player.position.y].moveable = false;
+        this.tab[player.position.x + 1][player.position.y].moveable = false;
+        TweenLite.to(player.position, player.speed, {
+          x: player.position.x + 1,
+          ease: Linear.easeNone,
+          onComplete: this.makeMoveable,
+          onCompleteParams: [player.position.x, player.position.y]
+        });
+        player.sprite.setTexture(PIXI.Texture.fromImage('images/right.png'));
+        return this.checkObstacle(player.position.x + 1, player.position.y, player);
+      }
+    }
+  };
+
+  BS.prototype.moveUp = function(player) {
+    if (player.position.y >= 1) {
+      if (this.tab[player.position.x][player.position.y - 1].moveable) {
+        this.tab[player.position.x][player.position.y].moveable = false;
+        this.tab[player.position.x][player.position.y - 1].moveable = false;
+        TweenLite.to(player.position, player.speed, {
+          y: player.position.y - 1,
+          ease: Linear.easeNone,
+          onComplete: this.makeMoveable,
+          onCompleteParams: [player.position.x, player.position.y]
+        });
+        player.sprite.setTexture(PIXI.Texture.fromImage('images/up.png'));
+        return this.checkObstacle(player.position.x, player.position.y - 1, player);
+      }
+    }
+  };
+
+  BS.prototype.moveDown = function(player) {
+    if (player.position.y < 14) {
+      if (this.tab[player.position.x][player.position.y + 1].moveable) {
+        this.tab[player.position.x][player.position.y].moveable = false;
+        this.tab[player.position.x][player.position.y + 1].moveable = false;
+        TweenLite.to(player.position, player.speed, {
+          y: player.position.y + 1,
+          ease: Linear.easeNone,
+          onComplete: this.makeMoveable,
+          onCompleteParams: [player.position.x, player.position.y]
+        });
+        player.sprite.setTexture(PIXI.Texture.fromImage('images/down.png'));
+        return this.checkObstacle(player.position.x, player.position.y + 1, player);
+      }
+    }
+  };
+
+  BS.prototype.placeBomb = function(player) {
+    var pozx, pozy;
+    if (player.bombCount > 0) {
+      if (this.obstacles[player.position.x][player.position.y] === 0) {
+        this.obstacles[player.position.x][player.position.y] = new Bomb(player.position.x, player.position.y, this.scale);
+        this.bombsTab.push(this.obstacles[player.position.x][player.position.y]);
+        pozx = this.obstacles[player.position.x][player.position.y].posX;
+        pozy = this.obstacles[player.position.x][player.position.y].posY;
+        this.stage.addChild(this.obstacles[player.position.x][player.position.y].sprite);
+        this.tab[player.position.x][player.position.y].moveable = false;
+        player.bombCount--;
+        return setTimeout(function() {
+          return basicScene.obstacles[pozx][pozy].explode(pozx, pozy, player);
+        }, 3000);
       }
     }
   };
 
   BS.prototype.keyDownTextField = function(e) {
-    var keyCode, pozx, pozy;
+    var keyCode;
     keyCode = e.keyCode;
-    if (__modulo(this.p1.position.x, 1) === 0 && __modulo(this.p1.position.y, 1) === 0) {
+    if (__modulo(this.me.position.x, 1) === 0 && __modulo(this.me.position.y, 1) === 0) {
       switch (keyCode) {
         case 37 || 65:
-          if (this.p1.position.x >= 1) {
-            if (this.tab[this.p1.position.x - 1][this.p1.position.y].moveable === true) {
-              TweenLite.to(this.p1.position, this.p1.speed, {
-                x: this.p1.position.x - 1,
-                ease: Linear.easeNone
-              });
-              this.p1.sprite.setTexture(PIXI.Texture.fromImage('images/left.png'));
-              return this.checkObstacle(this.p1.position.x - 1, this.p1.position.y);
-            }
-          }
-          break;
+          return this.moveLeft(this.me);
         case 39 || 68:
-          if (this.p1.position.x < 14) {
-            if (this.tab[this.p1.position.x + 1][this.p1.position.y].moveable === true) {
-              TweenLite.to(this.p1.position, this.p1.speed, {
-                x: this.p1.position.x + 1,
-                ease: Linear.easeNone
-              });
-              this.p1.sprite.setTexture(PIXI.Texture.fromImage('images/right.png'));
-              return this.checkObstacle(this.p1.position.x + 1, this.p1.position.y);
-            }
-          }
-          break;
+          return this.moveRight(this.me);
         case 38 || 87:
-          if (this.p1.position.y >= 1) {
-            if (this.tab[this.p1.position.x][this.p1.position.y - 1].moveable === true) {
-              TweenLite.to(this.p1.position, this.p1.speed, {
-                y: this.p1.position.y - 1,
-                ease: Linear.easeNone
-              });
-              this.p1.sprite.setTexture(PIXI.Texture.fromImage('images/up.png'));
-              return this.checkObstacle(this.p1.position.x, this.p1.position.y - 1);
-            }
-          }
-          break;
+          return this.moveUp(this.me);
         case 40 || 83:
-          if (this.p1.position.y < 14) {
-            if (this.tab[this.p1.position.x][this.p1.position.y + 1].moveable === true) {
-              TweenLite.to(this.p1.position, this.p1.speed, {
-                y: this.p1.position.y + 1,
-                ease: Linear.easeNone
-              });
-              this.p1.sprite.setTexture(PIXI.Texture.fromImage('images/down.png'));
-              return this.checkObstacle(this.p1.position.x, this.p1.position.y + 1);
-            }
-          }
-          break;
+          return this.moveDown(this.me);
         case 32:
-          if (this.p1.bombCount > 0) {
-            this.obstacles[this.p1.position.x][this.p1.position.y] = new Bomb(this.p1.position.x, this.p1.position.y, this.scale);
-            this.bombsTab.push(this.obstacles[this.p1.position.x][this.p1.position.y]);
-            pozx = this.obstacles[this.p1.position.x][this.p1.position.y].posX;
-            pozy = this.obstacles[this.p1.position.x][this.p1.position.y].posY;
-            this.stage.addChild(this.obstacles[this.p1.position.x][this.p1.position.y].sprite);
-            this.tab[this.p1.position.x][this.p1.position.y].moveable = false;
-            this.p1.bombCount--;
-            return setTimeout(function() {
-              return basicScene.obstacles[pozx][pozy].exp(pozx, pozy);
-            }, 3000);
-          }
+          return this.placeBomb(basicScene.me);
       }
     }
   };

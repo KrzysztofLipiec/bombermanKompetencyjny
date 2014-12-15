@@ -11,9 +11,10 @@ class BS
     @renderer = PIXI.autoDetectRenderer(@sizex, @sizey)
     document.body.appendChild(@renderer.view)
     @makeWorld()
-    @p1 = new Player(@scale)
-    @stage.addChild(@p1.sprite)
-    @p1.scale=@scale
+    @me = new Player(@scale,0,0)
+    @stage.addChild(@me.sprite)
+    @enemy = new Player(@scale,14,14)
+    @stage.addChild(@enemy.sprite)
 
   makeWorld: ->
     @tab = [
@@ -69,70 +70,108 @@ class BS
             @tab[i][j] = new Destro(i,j,@scale)
             @stage.addChild(@tab[i][j].sprite)
 
+  enemyRandom: () ->
+    setTimeout(@enemyRandom.bind(@), 500)
+    rand = Math.floor(Math.random() *4)
+    switch rand
+      when 0
+        @moveLeft(@enemy)
+      when 1
+        @moveRight(@enemy)
+      when 2
+        @moveUp(@enemy)
+      when 3
+        @moveDown(@enemy)
+      when 4
+        @placeBomb(basicScene.enemy)
 
 
-  frame: ->
+
+  frame:() ->
     setTimeout(@frame.bind(@), 60 / 1000)
     @renderer.render(@stage)
-    @p1.update()
+    @me.update()
+    @enemy.update()
 
-  checkObstacle:(x,y)->
+  checkObstacle:(x,y,player)->
     if @obstacles[x][y].bonus
       switch @obstacles[x][y].bonus
         when "hearth"
           @stage.removeChild(@obstacles[x][y].sprite)
-          @p1.lifes++
-          @obstacles[x][y].sprite = 0
+          player.lifes++
+          @obstacles[x][y]= 0
         when "bombPlus"
           @stage.removeChild(@obstacles[x][y].sprite)
-          @p1.bombCount++
-          @obstacles[x][y].sprite = 0
+          player.bombRange++
+          @obstacles[x][y]= 0
+
+  makeMoveable:(x,y) ->
+    basicScene.tab[x][y].moveable=true
+
+  moveLeft: (player)->
+    if player.position.x >=1
+      if (@tab[player.position.x-1][player.position.y].moveable)
+        @tab[player.position.x][player.position.y].moveable=false
+        @tab[player.position.x-1][player.position.y].moveable=false
+        TweenLite.to(player.position, player.speed, {x:player.position.x-1, ease:Linear.easeNone, onComplete:@makeMoveable, onCompleteParams:[player.position.x,player.position.y]})
+        player.sprite.setTexture(PIXI.Texture.fromImage('images/left.png'))
+        @checkObstacle(player.position.x-1,player.position.y,player)
+
+  moveRight: (player)->
+    if player.position.x <14
+      if @tab[player.position.x+1][player.position.y].moveable
+        @tab[player.position.x][player.position.y].moveable=false
+        @tab[player.position.x+1][player.position.y].moveable=false
+        TweenLite.to(player.position, player.speed, {x:player.position.x+1, ease:Linear.easeNone, onComplete:@makeMoveable, onCompleteParams:[player.position.x,player.position.y]})
+        player.sprite.setTexture(PIXI.Texture.fromImage('images/right.png'))
+        @checkObstacle(player.position.x+1,player.position.y,player)
+
+  moveUp:(player) ->
+    if player.position.y >=1
+      if @tab[player.position.x][player.position.y-1].moveable
+        @tab[player.position.x][player.position.y].moveable=false
+        @tab[player.position.x][player.position.y-1].moveable=false
+        TweenLite.to(player.position, player.speed,{y:player.position.y-1, ease:Linear.easeNone, onComplete:@makeMoveable, onCompleteParams:[player.position.x,player.position.y]})
+        player.sprite.setTexture(PIXI.Texture.fromImage('images/up.png'))
+        @checkObstacle(player.position.x,player.position.y-1,player)
+
+  moveDown:(player)->
+    if player.position.y < 14
+      if @tab[player.position.x][player.position.y+1].moveable
+        @tab[player.position.x][player.position.y].moveable=false
+        @tab[player.position.x][player.position.y+1].moveable=false
+        TweenLite.to(player.position, player.speed, {y:player.position.y+1, ease:Linear.easeNone, onComplete:@makeMoveable, onCompleteParams:[player.position.x,player.position.y]})
+        player.sprite.setTexture(PIXI.Texture.fromImage('images/down.png'))
+        @checkObstacle(player.position.x,player.position.y+1,player)
+
+  placeBomb:(player)->
+    if player.bombCount > 0
+      if @obstacles[player.position.x][player.position.y]==0
+        @obstacles[player.position.x][player.position.y]= new Bomb(player.position.x,player.position.y,@scale)
+        @bombsTab.push(@obstacles[player.position.x][player.position.y])
+        pozx=@obstacles[player.position.x][player.position.y].posX
+        pozy=@obstacles[player.position.x][player.position.y].posY
+        @stage.addChild(@obstacles[player.position.x][player.position.y].sprite);
+        @tab[player.position.x][player.position.y].moveable=false
+        player.bombCount--
+        setTimeout(
+          -> basicScene.obstacles[pozx][pozy].explode(pozx,pozy,player)
+          3000
+        )
 
 
 
   keyDownTextField : (e) ->
     keyCode = e.keyCode
-    if @p1.position.x %% 1 is 0 and @p1.position.y %% 1 is 0
+    if @me.position.x %% 1 is 0 and @me.position.y %% 1 is 0
       switch keyCode
         when (37 or 65)
-          if @p1.position.x >=1
-            if @tab[@p1.position.x-1][@p1.position.y].moveable==true
-              TweenLite.to(@p1.position, @p1.speed, {x:@p1.position.x-1, ease:Linear.easeNone,})
-              @p1.sprite.setTexture(PIXI.Texture.fromImage('images/left.png'))
-              @checkObstacle(@p1.position.x-1,@p1.position.y)
-
+          @moveLeft(@me)
         when (39 or 68)
-          if @p1.position.x <14
-            if @tab[@p1.position.x+1][@p1.position.y].moveable==true
-              TweenLite.to(@p1.position, @p1.speed, {x:@p1.position.x+1, ease:Linear.easeNone})
-              @p1.sprite.setTexture(PIXI.Texture.fromImage('images/right.png'))
-              @checkObstacle(@p1.position.x+1,@p1.position.y)
-
+          @moveRight(@me)
         when (38 or 87)
-          if @p1.position.y >=1
-            if @tab[@p1.position.x][@p1.position.y-1].moveable==true
-              TweenLite.to(@p1.position, @p1.speed,{y:@p1.position.y-1, ease:Linear.easeNone})
-              @p1.sprite.setTexture(PIXI.Texture.fromImage('images/up.png'))
-              @checkObstacle(@p1.position.x,@p1.position.y-1)
-
+          @moveUp(@me)
         when (40 or 83)
-          if @p1.position.y < 14
-            if @tab[@p1.position.x][@p1.position.y+1].moveable==true
-              TweenLite.to(@p1.position, @p1.speed, {y:@p1.position.y+1, ease:Linear.easeNone})
-              @p1.sprite.setTexture(PIXI.Texture.fromImage('images/down.png'))
-              @checkObstacle(@p1.position.x,@p1.position.y+1)
-
+          @moveDown(@me)
         when 32
-          if @p1.bombCount > 0
-            #if @obstacles[@p1.position.x][@p1.position.y] == 0
-              @obstacles[@p1.position.x][@p1.position.y]= new Bomb(@p1.position.x,@p1.position.y,@scale)
-              @bombsTab.push(@obstacles[@p1.position.x][@p1.position.y])
-              pozx=@obstacles[@p1.position.x][@p1.position.y].posX
-              pozy=@obstacles[@p1.position.x][@p1.position.y].posY
-              @stage.addChild(@obstacles[@p1.position.x][@p1.position.y].sprite);
-              @tab[@p1.position.x][@p1.position.y].moveable=false
-              @p1.bombCount--
-              setTimeout(
-                -> basicScene.obstacles[pozx][pozy].exp(pozx,pozy)
-                3000
-              )
+          @placeBomb(basicScene.me)

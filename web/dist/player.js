@@ -1,15 +1,15 @@
 var Player;
 
 Player = (function() {
-  function Player(s) {
-    this.s = s;
+  function Player(s, x, y) {
     this.position = {
-      x: 0,
-      y: 0
+      x: x,
+      y: y
     };
     this.speed = 0.3;
+    this.scale = s;
     this.sprite = new PIXI.Sprite(PIXI.Texture.fromImage('images/right.png'));
-    this.sprite.scale.x = this.sprite.scale.y = this.s;
+    this.sprite.scale.x = this.sprite.scale.y = this.scale;
     this.bombCount = 3;
     this.bombRange = 3;
     this.lifes = 3;
@@ -17,8 +17,8 @@ Player = (function() {
 
   Player.prototype.update = function() {
     var parent;
-    this.sprite.position.x = this.position.x * 50 * this.s;
-    this.sprite.position.y = this.position.y * 50 * this.s;
+    this.sprite.position.x = this.position.x * 50 * this.scale;
+    this.sprite.position.y = this.position.y * 50 * this.scale;
     if (this.sprite.parent) {
       parent = this.sprite.parent;
       parent.removeChild(this.sprite);
