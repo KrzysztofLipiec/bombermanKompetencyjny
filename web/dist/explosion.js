@@ -2,6 +2,8 @@ var Explosion;
 
 Explosion = (function() {
   function Explosion(x, y, scale, direction) {
+    this.x = x;
+    this.y = y;
     if (direction === 1) {
       this.sprite = new PIXI.Sprite(PIXI.Texture.fromImage('images/exp_hor.jpg'));
     }
@@ -11,11 +13,8 @@ Explosion = (function() {
     this.sprite.position.x = x * 50 * scale;
     this.sprite.position.y = y * 50 * scale;
     this.sprite.scale.x = this.sprite.scale.y = scale;
+    this.explodeable = true;
   }
-
-  Explosion.prototype.explosionClear = function(x, y) {
-    return basicScene.stage.removeChildAt(224);
-  };
 
   return Explosion;
 
