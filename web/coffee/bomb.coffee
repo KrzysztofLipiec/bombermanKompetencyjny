@@ -97,8 +97,9 @@ class Bomb
   exp: (x, y,player)->
     basicScene.obstacles[x][y].exploded = true
     basicScene.obstacles[x][y].sprite.setTexture(PIXI.Texture.fromImage('images/explosion.png'))
-    basicScene.tab[x][y].moveable=true
-    basicScene.me.bombCount++
+    basicScene.tab[x][y].bomb = false
+    player.bombCount++
+    basicScene.gui.changeBombCount(player)
     @createFlame("horizontal",player,x,y)
     @createFlame("vertical",player,x,y)
 
@@ -109,8 +110,7 @@ class Bomb
 
 
   afterExplode: (x,y) ->
-    rand = Math.floor(Math.random() *3)
-    console.log(rand)
+    rand = Math.floor(Math.random() *5)
     basicScene.tab[x][y] = new Grass(x,y,basicScene.scale)
     basicScene.stage.addChild(basicScene.tab[x][y].sprite)
     basicScene.obstacles[x][y] = 0
@@ -120,5 +120,9 @@ class Bomb
         basicScene.stage.addChild(basicScene.obstacles[x][y].sprite)
 
       when 1
-        basicScene.obstacles[x][y] = new Bonus(x,y,basicScene.scale,"bombPlus")
+        basicScene.obstacles[x][y] = new Bonus(x,y,basicScene.scale,"bombCount")
+        basicScene.stage.addChild(basicScene.obstacles[x][y].sprite)
+
+      when 2
+        basicScene.obstacles[x][y] = new Bonus(x,y,basicScene.scale,"bombRange")
         basicScene.stage.addChild(basicScene.obstacles[x][y].sprite)

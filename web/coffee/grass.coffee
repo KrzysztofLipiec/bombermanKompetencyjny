@@ -6,4 +6,5 @@ class Grass extends Block
     @sprite.position.x=x*50*scale
     @sprite.position.y=y*50*scale
     @sprite.scale.x=@sprite.scale.y=scale
+    @bomb=false
     @stone=false

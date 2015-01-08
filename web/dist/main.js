@@ -1,6 +1,8 @@
-var basicScene;
+var basicScene, gui;
 
-basicScene = new BS;
+gui = new GUI;
+
+basicScene = new BS(gui);
 
 document.addEventListener("keydown", basicScene.keyDownTextField.bind(basicScene), false);
 
