@@ -7,43 +7,37 @@ threadsafe: yes
 
 handlers:
 
-- url: /(.*\.json)
-  static_files: web/\1
-  upload: web/(.*\.json)
-
 - url: /(.*\.css)
   static_files: web/\1
   upload: web/(.*\.css)
 
 - url: /(.*\.js)
-  static_files: web/\1
-  upload: web/(.*\.js)
+  mime_type: text/javascript
+  static_files: js/\1
+  upload: js/(.*\.js)
 
-
-  # image files
-- url: /(.*\.(bmp|gif|ico|jpeg|jpg|png))
+- url: /(.*\.(gif|jpeg|jpg|png))
   static_files: web/\1
-  upload: web/(.*\.(bmp|gif|ico|jpeg|jpg|png))
+  upload: web/(.*\.(gif|jpeg|jpg|png))
 
 - url: /api/.*
-  script: project.backend.api.application
-
+  script: index.html
 
 - url: /(.*\.coffee)
-  static_dir: static/coffee.*
+  static_dir: web/coffee.*
 
 - url: /(.*\.web)
   static_dir: web
 
-- url: /images/
-  static_files: static/images/\1
-  upload: static/images/
+- url: /
+  static_files: web/dist/index.html
+  upload: web/dist/index.html
 
-- url: /index\.html
-  script: main.app
-
-#/C:\Users\Daniel\bombermanKompetencyjny\web\dist\index.html
-
+- url: /(.*\.html)
+  mime_type: text/html
+  static_files: web/\1
+  upload: web/(.*\.html)
+  expiration: "1h"
 
 - url: /.*
   script: main.app
