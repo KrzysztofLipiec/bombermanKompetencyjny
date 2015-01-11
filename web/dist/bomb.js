@@ -143,8 +143,9 @@ Bomb = (function() {
     var i, _i, _ref;
     basicScene.obstacles[x][y].exploded = true;
     basicScene.obstacles[x][y].sprite.setTexture(PIXI.Texture.fromImage('images/explosion.png'));
-    basicScene.tab[x][y].moveable = true;
-    basicScene.me.bombCount++;
+    basicScene.tab[x][y].bomb = false;
+    player.bombCount++;
+    basicScene.gui.changeBombCount(player);
     this.createFlame("horizontal", player, x, y);
     this.createFlame("vertical", player, x, y);
     for (i = _i = 0, _ref = this.flameTab.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
@@ -155,8 +156,7 @@ Bomb = (function() {
 
   Bomb.prototype.afterExplode = function(x, y) {
     var rand;
-    rand = Math.floor(Math.random() * 3);
-    console.log(rand);
+    rand = Math.floor(Math.random() * 5);
     basicScene.tab[x][y] = new Grass(x, y, basicScene.scale);
     basicScene.stage.addChild(basicScene.tab[x][y].sprite);
     basicScene.obstacles[x][y] = 0;
@@ -165,7 +165,10 @@ Bomb = (function() {
         basicScene.obstacles[x][y] = new Bonus(x, y, basicScene.scale, "hearth");
         return basicScene.stage.addChild(basicScene.obstacles[x][y].sprite);
       case 1:
-        basicScene.obstacles[x][y] = new Bonus(x, y, basicScene.scale, "bombPlus");
+        basicScene.obstacles[x][y] = new Bonus(x, y, basicScene.scale, "bombCount");
+        return basicScene.stage.addChild(basicScene.obstacles[x][y].sprite);
+      case 2:
+        basicScene.obstacles[x][y] = new Bonus(x, y, basicScene.scale, "bombRange");
         return basicScene.stage.addChild(basicScene.obstacles[x][y].sprite);
     }
   };

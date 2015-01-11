@@ -12,6 +12,7 @@ Grass = (function(_super) {
     this.sprite.position.x = x * 50 * scale;
     this.sprite.position.y = y * 50 * scale;
     this.sprite.scale.x = this.sprite.scale.y = scale;
+    this.bomb = false;
     this.stone = false;
   }
 
