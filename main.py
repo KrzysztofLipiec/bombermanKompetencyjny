@@ -12,12 +12,13 @@ import webapp2
 from google.appengine.datastore import entity_pb
 from google.appengine.ext import db
 from google.appengine.api import users
-from google.appengine.api import memcache
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
-from common.handlers import base #PROBLEM Z INSTALACJĄ BIBLIOTEKI
+import common.handlers #problem, pokazuje,ze nie ma takiej biblioteki
 
 
+# COFFEE SCIPRT W YAML FILE
+# NIE MOZNA DODAC APKI NA APP ENGINE
 
 
 def GetLogoutUrl():
@@ -40,7 +41,7 @@ class StronaGlowna(webapp.RequestHandler):
         # ws = create_connection("ws://localhost:8080/websocket")
         # print "Sending 'Hello, World'..."
         # ws.send("Hello, World")
-        #print "Sent"
+        # print "Sent"
         #print "Reeiving..."
         #result =  ws.recv()
         #print "Received '%s'" % result
@@ -59,10 +60,11 @@ class StronaGlowna(webapp.RequestHandler):
 
         # self.response.headers['Content-Type'] = 'text/plain'
         # self.response.out.write('Hello, webapp World!')
-#
+
+
 #
 # class Game(db.Model):
-#     player1 = db.StringProperty()
+# player1 = db.StringProperty()
 #     player2 = db.StringProperty()
 #     moveUp = db.StringProperty()
 #     moveDown = db.StringProperty()
@@ -121,49 +123,25 @@ class LoginHandler(webapp2.RequestHandler):
 application = webapp2.WSGIApplication([('/Login2', LoginHandler), ], debug=True)
 
 
-class CheckLoginStatus(base.BaseHandler):
+class CheckLoginStatus(common.handlers.base.BaseHandler):
     """Checks the login status of a user."""
 
     def get(self):
-        user = users.get_current_user();
+
+        user = users.get_current_user()
         if user:
             response = {
                 'loggedIn': True,
                 'user': user.get_current_user(),
-                'url': return users.create_login_url('/')
+                'url': users.create_login_url('/')
             }
-            else:
-                response = {
-                    'loggedIn': False,
-                    'url': GetLoginUrl()
-        }
-        self.response.headers['Content-Type'] = 'application/json'
+        else:
+            response = {
+                'loggedIn': False,
+                'url': users.create_login_url('/')
+            }
+        self.response.headers['Content-Type'] = "application/json"
         self.response.out.write(json.dumps(response))
-
-
-class Memcache(webapp.RequestHandler):
-    def get(self):
-
-        self.response.headers['Content-Type'] = 'text/plain'
-
-        m = Emp(name='Koen Bok')
-        t1 = time.time()
-
-        for i in xrange(int(self.request.get('times', 1))):
-            key = uuid.uuid4().hex
-            memcache.set(key, m)
-            r = memcache.get(key)
-
-        self.response.out.write('Pickle took: %.2f' % (time.time() - t1))
-
-        t1 = time.time()
-
-        for i in xrange(int(self.request.get('times', 1))):
-            key = uuid.uuid4().hex
-            memcache.set(key, db.model_to_protobuf(m).Encode())
-            r = db.model_from_protobuf(entity_pb.EntityProto(memcache.get(key)))
-
-        self.response.out.write('Proto took: %.2f' % (time.time() - t1))
 
 
 class Logout(webapp.RequestHandler):
@@ -181,7 +159,6 @@ class Register(webapp.RequestHandler):
 class Emp(db.Model):
     name = db.StringProperty(required=True)
     role = db.StringProperty(required=True)
-    times = 10000
 
     def to_dict(self):
         return dict([(p, unicode(getattr(self, p))) for p in self.properties()])
@@ -219,7 +196,6 @@ app = webapp.WSGIApplication([
                                  ('/login', LoginHandler),
                                  ('/logout', Logout),
                                  ('/register', Register),
-                                 ('/mem', Memcache),
                                  ('/test', Test),
                                  ('/test/<name>', Test, 'user-settings'),
                                  ('/getemp', GetEmp),

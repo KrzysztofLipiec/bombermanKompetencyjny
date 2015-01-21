@@ -23,9 +23,6 @@ handlers:
 - url: /api/.*
   script: index.html
 
-- url: /(.*\.coffee)
-  static_dir: web/coffee.*
-
 - url: /(.*\.web)
   static_dir: web
 
