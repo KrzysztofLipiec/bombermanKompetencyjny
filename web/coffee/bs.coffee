@@ -1,5 +1,6 @@
 class BS
-  constructor: (gui) ->
+  constructor: (gui, controller) ->
+    @controller = controller
     if (window.innerWidth >= window.innerHeight)
       @sizex = window.innerHeight - (window.innerHeight/15)
       @sizey = window.innerHeight - (window.innerHeight/15)
@@ -9,11 +10,31 @@ class BS
     @scale=@sizex/15/50
     @stage = new PIXI.Stage(0x66FF99)
     @renderer = PIXI.autoDetectRenderer(@sizex, @sizey)
-    document.body.appendChild(@renderer.view)
+    $("#game").append(@renderer.view)
     @makeWorld()
-    @me = new Player(@scale,0,0,'me')
+    myPos = {}
+    enPos = {}
+    if (window.mySign == "X")
+      myPos = {
+        x: 0,
+        y: 0
+      }
+      enPos = {
+        x: 14,
+        y: 14
+      }
+    else
+      myPos = {
+        x: 14,
+        y: 14
+      }
+      enPos = {
+        x: 0,
+        y: 0
+      }
+    @me = new Player(@scale,myPos.x,myPos.y,'me')
+    @enemy = new Player(@scale,enPos.x,enPos.y,'enemy')
     @stage.addChild(@me.sprite)
-    @enemy = new Player(@scale,14,14,'enemy')
     @stage.addChild(@enemy.sprite)
     @gui = gui
 
@@ -70,29 +91,29 @@ class BS
           when 2
             @tab[i][j] = new Destro(i,j,@scale)
             @stage.addChild(@tab[i][j].sprite)
-
-  enemyRandom: () ->
-    setTimeout(@enemyRandom.bind(@), 1000)
-    rand = Math.floor(Math.random() *5)
-    switch rand
-      when 0
-        @moveLeft(@enemy)
-      when 1
-        @moveRight(@enemy)
-      when 2
-        @moveUp(@enemy)
-      when 3
-        @moveDown(@enemy)
-      when 4
-        @placeBomb(@enemy)
+#
+#  enemyRandom: () ->
+#    setTimeout(@enemyRandom.bind(@), 1000)
+#    rand = Math.floor(Math.random() *5)
+#    switch rand
+#      when 0
+#        @moveLeft(@enemy)
+#      when 1
+#        @moveRight(@enemy)
+#      when 2
+#        @moveUp(@enemy)
+#      when 3
+#        @moveDown(@enemy)
+#      when 4
+#        @placeBomb(@enemy)
 
 
 
   frame:() ->
-    setTimeout(@frame.bind(@), 60 / 1000)
     @renderer.render(@stage)
     @me.update()
     @enemy.update()
+    setTimeout(@frame.bind(@), 60 / 1000)
 
   checkObstacle:(x,y,player)->
     if @obstacles[x][y].bonus
@@ -116,9 +137,31 @@ class BS
   makeMoveable:(x,y) ->
     basicScene.tab[x][y].moveable=true
 
+  sendActionMessage: (action)->
+    $.ajax({
+      url: "/action",
+      data: {
+        "g": window.game_key,
+        "action": action,
+        "player": window.mySign
+      }
+      method: "post"
+    })
+
+  sendMoveMessage: (dir)->
+    $.ajax({
+      url: "/move",
+      data: {
+        "g": window.game_key,
+        "direction": dir,
+        "player": window.mySign
+      }
+      method: "post"
+    })
   moveLeft: (player)->
     if player.position.x >=1 and typeof @tab[player.position.x-1][player.position.y] isnt 'undefined'
       if (@tab[player.position.x-1][player.position.y].moveable and @tab[player.position.x-1][player.position.y].bomb is false)
+
         @tab[player.position.x][player.position.y].moveable=false
         @tab[player.position.x-1][player.position.y].moveable=false
         TweenLite.to(player.position, player.speed, {x:player.position.x-1, ease:Linear.easeNone, onComplete:@makeMoveable, onCompleteParams:[player.position.x,player.position.y]})
@@ -128,6 +171,7 @@ class BS
   moveRight: (player)->
     if player.position.x <14 and typeof @tab[player.position.x+1][player.position.y] isnt 'undefined'
       if (@tab[player.position.x+1][player.position.y].moveable and @tab[player.position.x+1][player.position.y].bomb is false)
+
         @tab[player.position.x][player.position.y].moveable=false
         @tab[player.position.x+1][player.position.y].moveable=false
         TweenLite.to(player.position, player.speed, {x:player.position.x+1, ease:Linear.easeNone, onComplete:@makeMoveable, onCompleteParams:[player.position.x,player.position.y]})
@@ -175,20 +219,29 @@ class BS
     if @me.position.x %% 1 is 0 and @me.position.y %% 1 is 0
       switch keyCode
         when 37
+          @sendMoveMessage("left");
           @moveLeft(@me)
         when 65
+          @sendMoveMessage("left");
           @moveLeft(@me)
         when 39
+          @sendMoveMessage("right");
           @moveRight(@me)
         when 68
+          @sendMoveMessage("right");
           @moveRight(@me)
         when 38
+          @sendMoveMessage("up");
           @moveUp(@me)
         when 87
+          @sendMoveMessage("up");
           @moveUp(@me)
         when 40
+          @sendMoveMessage("down");
           @moveDown(@me)
         when 83
+          @sendMoveMessage("down");
           @moveDown(@me)
         when 32
+          @sendActionMessage("placeBomb");
           @placeBomb(basicScene.me)

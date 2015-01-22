@@ -1,11 +1,17 @@
-var basicScene, gui;
+var basicScene, chanel, gui, startGame;
 
-gui = new GUI;
+startGame = $.Deferred();
 
-basicScene = new BS(gui);
+gui = null;
 
-document.addEventListener("keydown", basicScene.keyDownTextField.bind(basicScene), false);
+basicScene = null;
 
-basicScene.frame();
+chanel = new channelController(startGame);
 
-basicScene.enemyRandom();
+startGame.done(function() {
+  window.history.pushState('page2', 'Title', window.link);
+  gui = new GUI;
+  basicScene = new BS(gui, chanel);
+  document.addEventListener("keydown", basicScene.keyDownTextField.bind(basicScene), false);
+  return basicScene.frame();
+});

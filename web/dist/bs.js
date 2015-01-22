@@ -2,7 +2,9 @@ var BS,
   __modulo = function(a, b) { return (+a % (b = +b) + b) % b; };
 
 BS = (function() {
-  function BS(gui) {
+  function BS(gui, controller) {
+    var enPos, myPos;
+    this.controller = controller;
     if (window.innerWidth >= window.innerHeight) {
       this.sizex = window.innerHeight - (window.innerHeight / 15);
       this.sizey = window.innerHeight - (window.innerHeight / 15);
@@ -13,11 +15,32 @@ BS = (function() {
     this.scale = this.sizex / 15 / 50;
     this.stage = new PIXI.Stage(0x66FF99);
     this.renderer = PIXI.autoDetectRenderer(this.sizex, this.sizey);
-    document.body.appendChild(this.renderer.view);
+    $("#game").append(this.renderer.view);
     this.makeWorld();
-    this.me = new Player(this.scale, 0, 0, 'me');
+    myPos = {};
+    enPos = {};
+    if (window.mySign === "X") {
+      myPos = {
+        x: 0,
+        y: 0
+      };
+      enPos = {
+        x: 14,
+        y: 14
+      };
+    } else {
+      myPos = {
+        x: 14,
+        y: 14
+      };
+      enPos = {
+        x: 0,
+        y: 0
+      };
+    }
+    this.me = new Player(this.scale, myPos.x, myPos.y, 'me');
+    this.enemy = new Player(this.scale, enPos.x, enPos.y, 'enemy');
     this.stage.addChild(this.me.sprite);
-    this.enemy = new Player(this.scale, 14, 14, 'enemy');
     this.stage.addChild(this.enemy.sprite);
     this.gui = gui;
   }
@@ -56,29 +79,11 @@ BS = (function() {
     return _results;
   };
 
-  BS.prototype.enemyRandom = function() {
-    var rand;
-    setTimeout(this.enemyRandom.bind(this), 1000);
-    rand = Math.floor(Math.random() * 5);
-    switch (rand) {
-      case 0:
-        return this.moveLeft(this.enemy);
-      case 1:
-        return this.moveRight(this.enemy);
-      case 2:
-        return this.moveUp(this.enemy);
-      case 3:
-        return this.moveDown(this.enemy);
-      case 4:
-        return this.placeBomb(this.enemy);
-    }
-  };
-
   BS.prototype.frame = function() {
-    setTimeout(this.frame.bind(this), 60 / 1000);
     this.renderer.render(this.stage);
     this.me.update();
-    return this.enemy.update();
+    this.enemy.update();
+    return setTimeout(this.frame.bind(this), 60 / 1000);
   };
 
   BS.prototype.checkObstacle = function(x, y, player) {
@@ -105,6 +110,30 @@ BS = (function() {
 
   BS.prototype.makeMoveable = function(x, y) {
     return basicScene.tab[x][y].moveable = true;
+  };
+
+  BS.prototype.sendActionMessage = function(action) {
+    return $.ajax({
+      url: "/action",
+      data: {
+        "g": window.game_key,
+        "action": action,
+        "player": window.mySign
+      },
+      method: "post"
+    });
+  };
+
+  BS.prototype.sendMoveMessage = function(dir) {
+    return $.ajax({
+      url: "/move",
+      data: {
+        "g": window.game_key,
+        "direction": dir,
+        "player": window.mySign
+      },
+      method: "post"
+    });
   };
 
   BS.prototype.moveLeft = function(player) {
@@ -200,22 +229,31 @@ BS = (function() {
     if (__modulo(this.me.position.x, 1) === 0 && __modulo(this.me.position.y, 1) === 0) {
       switch (keyCode) {
         case 37:
+          this.sendMoveMessage("left");
           return this.moveLeft(this.me);
         case 65:
+          this.sendMoveMessage("left");
           return this.moveLeft(this.me);
         case 39:
+          this.sendMoveMessage("right");
           return this.moveRight(this.me);
         case 68:
+          this.sendMoveMessage("right");
           return this.moveRight(this.me);
         case 38:
+          this.sendMoveMessage("up");
           return this.moveUp(this.me);
         case 87:
+          this.sendMoveMessage("up");
           return this.moveUp(this.me);
         case 40:
+          this.sendMoveMessage("down");
           return this.moveDown(this.me);
         case 83:
+          this.sendMoveMessage("down");
           return this.moveDown(this.me);
         case 32:
+          this.sendActionMessage("placeBomb");
           return this.placeBomb(basicScene.me);
       }
     }

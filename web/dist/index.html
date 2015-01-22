@@ -1,10 +1,27 @@
 <html xmlns="http://www.w3.org/1999/html">
 <head>
     <title>Kompetencyjny</title>
+    <script type="text/javascript" src="/_ah/channel/jsapi"></script>
     <script src="pixi.js-master/bin/pixi.dev.js"></script>
+    <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
 </head>
 <body style="margin:0;padding:0;position: fixed;">
-<div  id="gui" style="margin:0;padding:0;"></div>
+<script>
+    window.token = '{{ token }}';
+    window.game_key = '{{ game_key }}';
+    window.me = '{{ me }}';
+    window.link = '{{game_link}}';
+    window.mySign = '{{mySign}}';
+</script>
+<div id="displayGame">
+    <div id="gui" style="margin:0;padding:0;"></div>
+    <div id="game"></div>
+</div>
+<div id="displayWaiting">
+    WAITING KURWA!
+    <a href="{{game_link}}">link</a>
+
+</div>
 <script src="gui.js"></script>
 <script src="bs.js"></script>
 <script src="player.js"></script>
@@ -16,6 +33,7 @@
 <script src="explosion.js"></script>
 <script src="bonus.js"></script>
 <script src="TweenLite.min.js"></script>
+<script src="channelController.js"></script>
 <script src="main.js"></script>
 
 </body>
