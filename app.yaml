@@ -20,7 +20,24 @@ handlers:
   upload: web/dist/images(.*\.(gif|jpeg|jpg|png))
 
 - url: /api/.*
+<<<<<<< HEAD
   script: main.app
+=======
+  script: index.html
+
+- url: /(.*\.web)
+  static_dir: web
+
+- url: /
+  static_files: web/dist/index.html
+  upload: web/dist/index.html
+
+- url: /(.*\.html)
+  mime_type: text/html
+  static_files: web/\1
+  upload: web/(.*\.html)
+  expiration: "1h"
+>>>>>>> 7a5ccc020eeae05f8c213167efb4151d9fc89cad
 
 - url: /.*
   script: main.app
