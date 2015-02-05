@@ -5,10 +5,10 @@ Explosion = (function() {
     this.x = x;
     this.y = y;
     if (direction === 1) {
-      this.sprite = new PIXI.Sprite(PIXI.Texture.fromImage('images/exp_hor.jpg'));
+      this.sprite = new PIXI.Sprite(PIXI.Texture.fromImage('images/exp_hor.png'));
     }
     if (direction === 2) {
-      this.sprite = new PIXI.Sprite(PIXI.Texture.fromImage('images/exp_vert.jpg'));
+      this.sprite = new PIXI.Sprite(PIXI.Texture.fromImage('images/exp_vert.pnp'));
     }
     this.sprite.position.x = x * 50 * scale;
     this.sprite.position.y = y * 50 * scale;
