@@ -51,6 +51,7 @@ class Player
 
               console.log("Straciles zycie")
               setTimeout(@reset.bind(@),2000)
-
+              basicScene.sendActionMessage("loseLife")
               @lifes--
+
               basicScene.gui.changeLifes(this)

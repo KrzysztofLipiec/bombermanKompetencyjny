@@ -116,48 +116,44 @@ class BS
     setTimeout(@frame.bind(@), 60 / 1000)
 
   checkObstacle:(x,y,player)->
-    if @obstacles[x][y].bonus
+    if @obstacles[x][y].bonus && player.name != "enemy"
       switch @obstacles[x][y].bonus
         when "hearth"
           @stage.removeChild(@obstacles[x][y].sprite)
           player.lifes++
+          @sendActionMessage("getBonus", {bonus: "life"})
           gui.changeLifes(player)
           @obstacles[x][y]= 0
         when "bombCount"
           @stage.removeChild(@obstacles[x][y].sprite)
           player.bombCount++
+          @sendActionMessage("getBonus", {bonus: "bomb"})
           gui.changeBombCount(player)
           @obstacles[x][y]= 0
         when "bombRange"
           @stage.removeChild(@obstacles[x][y].sprite)
           player.bombRange++
+          @sendActionMessage("getBonus", {bonus: "range"})
           gui.changeBombRange(player)
           @obstacles[x][y]= 0
 
   makeMoveable:(x,y) ->
     basicScene.tab[x][y].moveable=true
 
-  sendActionMessage: (action)->
-    $.ajax({
-      url: "/action",
-      data: {
-        "g": window.game_key,
-        "action": action,
-        "player": window.mySign
-      }
-      method: "post"
-    })
+  sendActionMessage: (action, options)->
+    data = {
+      "action": action,
+      "options": options
+    }
+    chanel.websocket.send(JSON.stringify(data))
 
   sendMoveMessage: (dir)->
-    $.ajax({
-      url: "/move",
-      data: {
-        "g": window.game_key,
-        "direction": dir,
-        "player": window.mySign
+    data = {
+        "action": "move",
+        "direction": dir
       }
-      method: "post"
-    })
+    chanel.websocket.send(JSON.stringify(data))
+
   moveLeft: (player)->
     if player.position.x >=1 and typeof @tab[player.position.x-1][player.position.y] isnt 'undefined'
       if (@tab[player.position.x-1][player.position.y].moveable and @tab[player.position.x-1][player.position.y].bomb is false)

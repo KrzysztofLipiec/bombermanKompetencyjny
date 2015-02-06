@@ -87,21 +87,30 @@ BS = (function() {
   };
 
   BS.prototype.checkObstacle = function(x, y, player) {
-    if (this.obstacles[x][y].bonus) {
+    if (this.obstacles[x][y].bonus && player.name !== "enemy") {
       switch (this.obstacles[x][y].bonus) {
         case "hearth":
           this.stage.removeChild(this.obstacles[x][y].sprite);
           player.lifes++;
+          this.sendActionMessage("getBonus", {
+            bonus: "life"
+          });
           gui.changeLifes(player);
           return this.obstacles[x][y] = 0;
         case "bombCount":
           this.stage.removeChild(this.obstacles[x][y].sprite);
           player.bombCount++;
+          this.sendActionMessage("getBonus", {
+            bonus: "bomb"
+          });
           gui.changeBombCount(player);
           return this.obstacles[x][y] = 0;
         case "bombRange":
           this.stage.removeChild(this.obstacles[x][y].sprite);
           player.bombRange++;
+          this.sendActionMessage("getBonus", {
+            bonus: "range"
+          });
           gui.changeBombRange(player);
           return this.obstacles[x][y] = 0;
       }
@@ -112,28 +121,22 @@ BS = (function() {
     return basicScene.tab[x][y].moveable = true;
   };
 
-  BS.prototype.sendActionMessage = function(action) {
-    return $.ajax({
-      url: "/action",
-      data: {
-        "g": window.game_key,
-        "action": action,
-        "player": window.mySign
-      },
-      method: "post"
-    });
+  BS.prototype.sendActionMessage = function(action, options) {
+    var data;
+    data = {
+      "action": action,
+      "options": options
+    };
+    return chanel.websocket.send(JSON.stringify(data));
   };
 
   BS.prototype.sendMoveMessage = function(dir) {
-    return $.ajax({
-      url: "/move",
-      data: {
-        "g": window.game_key,
-        "direction": dir,
-        "player": window.mySign
-      },
-      method: "post"
-    });
+    var data;
+    data = {
+      "action": "move",
+      "direction": dir
+    };
+    return chanel.websocket.send(JSON.stringify(data));
   };
 
   BS.prototype.moveLeft = function(player) {
